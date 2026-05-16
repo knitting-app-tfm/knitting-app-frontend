@@ -43,7 +43,7 @@ function ImportPage() {
           </div>
 
           <div className="col-md-4">
-            <div className="card h-100 opacity-50">
+            <div className="card h-100">
               <div className="card-img-top pt-4">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -68,9 +68,12 @@ function ImportPage() {
                   Paste your pattern text directly to import it into the
                   application.
                 </p>
-                <button className="btn btn-primary" disabled>
+                <Link
+                  to="/import/text"
+                  className="btn btn-primary stretched-link"
+                >
                   Import with plain text
-                </button>
+                </Link>
               </div>
             </div>
           </div>
