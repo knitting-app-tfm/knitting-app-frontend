@@ -13,7 +13,7 @@ export async function importPatternFromPdf(file) {
     const error = await response.json();
     const detail = error.detail;
     throw new Error(
-      typeof detail === "string" ? detail : "Error al importar el patrón"
+      typeof detail === "string" ? detail : "Error al importar el patrón",
     );
   }
 
@@ -31,7 +31,7 @@ export async function importPatternFromText(text) {
     const error = await response.json();
     const detail = error.detail;
     throw new Error(
-      typeof detail === "string" ? detail : "Error al importar el patrón"
+      typeof detail === "string" ? detail : "Error al importar el patrón",
     );
   }
 

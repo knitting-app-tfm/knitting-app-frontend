@@ -12,20 +12,28 @@ describe("ImportTextForm", () => {
   it("shows an error when the form is submitted with empty text", () => {
     render(<ImportTextForm onSubmit={vi.fn()} loading={false} />);
 
-    fireEvent.submit(screen.getByRole("button", { name: "Import" }).closest("form"));
+    fireEvent.submit(
+      screen.getByRole("button", { name: "Import" }).closest("form"),
+    );
 
-    expect(screen.getByText("Please paste your pattern text before importing.")).toBeInTheDocument();
+    expect(
+      screen.getByText("Please paste your pattern text before importing."),
+    ).toBeInTheDocument();
   });
 
   it("enables the button and clears any error when text is entered", () => {
     render(<ImportTextForm onSubmit={vi.fn()} loading={false} />);
 
-    fireEvent.submit(screen.getByRole("button", { name: "Import" }).closest("form"));
+    fireEvent.submit(
+      screen.getByRole("button", { name: "Import" }).closest("form"),
+    );
     fireEvent.change(screen.getByRole("textbox"), {
       target: { value: "Cast on 20 stitches" },
     });
 
-    expect(screen.queryByText("Please paste your pattern text before importing.")).not.toBeInTheDocument();
+    expect(
+      screen.queryByText("Please paste your pattern text before importing."),
+    ).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Import" })).not.toBeDisabled();
   });
 

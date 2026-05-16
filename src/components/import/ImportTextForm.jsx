@@ -27,9 +27,7 @@ function ImportTextForm({ onSubmit, loading }) {
             if (textError && e.target.value.trim()) setTextError(null);
           }}
         />
-        {textError && (
-          <div className="invalid-feedback">{textError}</div>
-        )}
+        {textError && <div className="invalid-feedback">{textError}</div>}
       </div>
 
       <button

@@ -29,7 +29,7 @@ describe("importPatternFromPdf", () => {
 
     expect(fetchMock).toHaveBeenCalledWith(
       `${API_URL}/patterns/import/pdf`,
-      expect.objectContaining({ method: "POST", body: expect.any(FormData) })
+      expect.objectContaining({ method: "POST", body: expect.any(FormData) }),
     );
   });
 
@@ -48,28 +48,28 @@ describe("importPatternFromPdf", () => {
   it("throws with the detail message when the response is not ok", async () => {
     vi.stubGlobal(
       "fetch",
-      mockFetch({ detail: "Only PDF files are allowed" }, false)
+      mockFetch({ detail: "Only PDF files are allowed" }, false),
     );
 
     const file = new File(["content"], "pattern.pdf", {
       type: "application/pdf",
     });
     await expect(importPatternFromPdf(file)).rejects.toThrow(
-      "Only PDF files are allowed"
+      "Only PDF files are allowed",
     );
   });
 
   it("throws a generic error when detail is not a string", async () => {
     vi.stubGlobal(
       "fetch",
-      mockFetch({ detail: [{ msg: "field required" }] }, false)
+      mockFetch({ detail: [{ msg: "field required" }] }, false),
     );
 
     const file = new File(["content"], "pattern.pdf", {
       type: "application/pdf",
     });
     await expect(importPatternFromPdf(file)).rejects.toThrow(
-      "Error al importar el patrón"
+      "Error al importar el patrón",
     );
   });
 });
@@ -87,7 +87,7 @@ describe("importPatternFromText", () => {
         method: "POST",
         headers: { "Content-Type": "text/plain" },
         body: "Cast on 20 stitches",
-      })
+      }),
     );
   });
 
@@ -103,22 +103,22 @@ describe("importPatternFromText", () => {
   it("throws with the detail message when the response is not ok", async () => {
     vi.stubGlobal(
       "fetch",
-      mockFetch({ detail: "Text cannot be empty" }, false)
+      mockFetch({ detail: "Text cannot be empty" }, false),
     );
 
     await expect(importPatternFromText("")).rejects.toThrow(
-      "Text cannot be empty"
+      "Text cannot be empty",
     );
   });
 
   it("throws a generic error when detail is not a string", async () => {
     vi.stubGlobal(
       "fetch",
-      mockFetch({ detail: [{ msg: "field required" }] }, false)
+      mockFetch({ detail: [{ msg: "field required" }] }, false),
     );
 
     await expect(importPatternFromText("")).rejects.toThrow(
-      "Error al importar el patrón"
+      "Error al importar el patrón",
     );
   });
 });
