@@ -18,6 +18,13 @@ function NavBar() {
             </NavLink>
           </li>
         </ul>
+        <ul className="navbar-nav ms-auto">
+          <li className="nav-item">
+            <NavLink className="nav-link" to="/register">
+              Register
+            </NavLink>
+          </li>
+        </ul>
       </div>
     </nav>
   );

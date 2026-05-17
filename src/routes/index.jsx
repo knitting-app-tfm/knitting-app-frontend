@@ -4,12 +4,14 @@ import App from "../App";
 import ImportPage from "../pages/import/ImportPage";
 import ImportPdfPage from "../pages/import/ImportPdfPage";
 import ImportTextPage from "../pages/import/ImportTextPage";
+import RegisterPage from "../pages/auth/RegisterPage";
 
 const router = createBrowserRouter([
   {
     element: <Layout />,
     children: [
       { path: "/", element: <App /> },
+      { path: "/register", element: <RegisterPage /> },
       { path: "/import", element: <ImportPage /> },
       { path: "/import/pdf", element: <ImportPdfPage /> },
       { path: "/import/text", element: <ImportTextPage /> },
