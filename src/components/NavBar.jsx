@@ -17,6 +17,11 @@ function NavBar() {
               Import
             </NavLink>
           </li>
+          <li className="nav-item">
+            <NavLink className="nav-link" to="/dictionary">
+              Dictionary
+            </NavLink>
+          </li>
         </ul>
         <ul className="navbar-nav ms-auto">
           <li className="nav-item">
