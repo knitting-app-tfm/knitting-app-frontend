@@ -1,0 +1,219 @@
+.pattern-detail {
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+/* Hero */
+.pattern-hero {
+  position: relative;
+  border-radius: 14px;
+  overflow: hidden;
+  margin-bottom: 1.75rem;
+  background: var(--code-bg);
+}
+
+.pattern-hero__img {
+  width: 100%;
+  height: 320px;
+  object-fit: cover;
+  display: block;
+}
+
+.pattern-hero__overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.72) 0%,
+    rgba(0, 0, 0, 0.08) 55%
+  );
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 1.5rem 1.75rem;
+}
+
+.pattern-hero__title {
+  color: #fff;
+  font-size: 2rem;
+  font-weight: 600;
+  letter-spacing: -0.5px;
+  margin: 0 0 0.5rem;
+  line-height: 1.15;
+}
+
+/* Header without image */
+.pattern-header {
+  margin-bottom: 1.75rem;
+}
+
+.pattern-header__title {
+  font-size: 2rem;
+  letter-spacing: -0.5px;
+  margin: 0 0 0.625rem;
+}
+
+/* Badges */
+.pattern-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.pattern-badge--craft-light {
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(4px);
+}
+
+.pattern-badge--craft {
+  background: var(--accent-bg);
+  color: var(--accent);
+  border: 1px solid var(--accent-border);
+}
+
+.pattern-sizes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+  margin-top: 0.875rem;
+}
+
+.pattern-size-pill {
+  display: inline-flex;
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  background: var(--code-bg);
+  color: var(--text-h);
+  border: 1px solid var(--border);
+}
+
+/* Section title */
+.pattern-section-title {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text);
+  font-weight: 600;
+  margin: 0 0 0.875rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border);
+}
+
+/* Gauge grid */
+.gauge-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(148px, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 2rem;
+}
+
+.gauge-stat {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1rem 1.125rem;
+  background: var(--bg);
+}
+
+.gauge-stat__value {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--text-h);
+  line-height: 1;
+  margin-bottom: 0.3rem;
+  font-family: var(--mono);
+}
+
+.gauge-stat__label {
+  font-size: 0.75rem;
+  color: var(--text);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Yarn cards */
+.yarn-card {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1.125rem 1.25rem;
+  margin-bottom: 0.75rem;
+  background: var(--bg);
+}
+
+.yarn-card__header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.yarn-card__name {
+  font-weight: 600;
+  color: var(--text-h);
+  font-size: 0.95rem;
+}
+
+.yarn-card__badge {
+  font-size: 0.72rem;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  background: var(--code-bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+  letter-spacing: 0.03em;
+}
+
+.yarn-card__stats {
+  display: flex;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+
+.yarn-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.yarn-stat__value {
+  font-size: 1.05rem;
+  font-weight: 500;
+  color: var(--text-h);
+  font-family: var(--mono);
+}
+
+.yarn-stat__label {
+  font-size: 0.72rem;
+  color: var(--text);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Edit link */
+.pattern-edit-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.875rem;
+  color: var(--text);
+  text-decoration: none;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.375rem 0.875rem;
+  transition:
+    border-color 0.12s,
+    color 0.12s;
+}
+
+.pattern-edit-link:hover {
+  border-color: var(--accent-border);
+  color: var(--accent);
+}

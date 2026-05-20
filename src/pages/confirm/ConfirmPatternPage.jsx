@@ -40,7 +40,7 @@ function ConfirmPatternPage() {
       if (data.coverImage) fd.append("cover_image", data.coverImage);
 
       await confirmPattern(id, fd);
-      navigate("/");
+      navigate(`/patterns/${id}`);
     } catch (err) {
       setSubmitError(err.message);
     } finally {
