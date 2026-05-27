@@ -1,0 +1,84 @@
+/* Google Fonts — Figtree (headings + body) */
+@import url('https://fonts.googleapis.com/css2?family=Figtree:wght@300..900&display=swap');
+
+/* ── Minimal reset ── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/*
+  Bootstrap variable overrides.
+  index.css is loaded after Bootstrap in main.jsx so these win.
+*/
+:root {
+  --bs-primary:          var(--kn-primary);
+  --bs-primary-rgb:      91, 1, 1;
+  --bs-secondary:        var(--kn-secondary);
+  --bs-secondary-rgb:    167, 186, 218;
+  --bs-body-font-family: var(--kn-font-body);
+  --bs-body-color:       var(--kn-text-secondary);
+  --bs-body-bg:          var(--kn-bg);
+  --bs-link-color:       var(--kn-secondary);
+  --bs-link-hover-color: var(--kn-secondary-dark);
+  --bs-border-color:     var(--kn-border);
+  --bs-border-radius:    var(--kn-radius-md);
+  --bs-border-radius-sm: var(--kn-radius-sm);
+  --bs-border-radius-lg: var(--kn-radius-lg);
+}
+
+/* ── Body ── */
+body {
+  margin: 0;
+  font-family: var(--kn-font-body);
+  color: var(--kn-text-secondary);
+  background-color: var(--kn-bg);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ── Headings ── */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--kn-font-heading);
+  color: var(--kn-text-primary);
+  font-weight: var(--kn-weight-bold);
+  line-height: 1.15;
+  letter-spacing: -0.025em;
+  margin-top: 0;
+}
+
+h1 { font-size: clamp(2.25rem, 5vw, 3.5rem); font-weight: 800; }
+h2 { font-size: clamp(1.5rem, 3vw, 2.25rem); font-weight: 700; }
+h3 { font-size: 1.375rem; font-weight: 700; letter-spacing: -0.02em; }
+h4 { font-size: 1.125rem; font-weight: 600; letter-spacing: -0.01em; }
+h5 { font-size: 1rem;     font-weight: 600; letter-spacing: 0; }
+h6 { font-size: var(--kn-text-sm); font-weight: 600; letter-spacing: 0; }
+
+/* ── Paragraphs ── */
+p {
+  margin: 0 0 var(--kn-spacing-4);
+  color: var(--kn-text-secondary);
+}
+
+/* ── Links ── */
+a {
+  color: var(--kn-secondary);
+  text-decoration: none;
+  transition: color var(--kn-transition-fast);
+}
+
+a:hover {
+  color: var(--kn-secondary-dark);
+}
+
+/* ── Forms: inherit our font (Bootstrap resets this) ── */
+input, textarea, select, button {
+  font-family: inherit;
+}
+
+/* ── Code ── */
+code, kbd, pre {
+  font-family: var(--kn-font-mono);
+}

@@ -1,0 +1,112 @@
+/*
+  Knitting App – Design tokens
+  Prefix --kn- avoids conflicts with Bootstrap and other libraries.
+*/
+
+:root {
+  /* ── Primary: maroon ── */
+  --kn-primary:        #5b0101;
+  --kn-primary-light:  #8b1a1a;
+  --kn-primary-dark:   #3a0000;
+  --kn-primary-bg:     rgba(91, 1, 1, 0.08);
+  --kn-primary-border: rgba(91, 1, 1, 0.22);
+
+  /* ── Secondary: sage green ── */
+  --kn-secondary:        #a7c37a;
+  --kn-secondary-light:  #c2d89e;
+  --kn-secondary-dark:   #7a9d50;
+  --kn-secondary-bg:     rgba(167, 195, 122, 0.15);
+  --kn-secondary-border: rgba(167, 195, 122, 0.40);
+
+  /* ── Accent: lavender (tertiary) ── */
+  --kn-accent:        #a7bada;
+  --kn-accent-light:  #c4d4eb;
+  --kn-accent-dark:   #7090b8;
+  --kn-accent-bg:     rgba(167, 186, 218, 0.20);
+  --kn-accent-border: rgba(167, 186, 218, 0.50);
+
+  /* ── Neutrals ── */
+  --kn-bg:             #faf9f7;
+  --kn-surface:        #ffffff;
+  --kn-surface-alt:    #f2ede7;
+  --kn-text-primary:   #1a1714;
+  --kn-text-secondary: #5c554e;
+  --kn-text-muted:     #9a928a;
+  --kn-border:         #e5dfd8;
+  --kn-border-strong:  #cec6bc;
+
+  /* ── Typography ── */
+  --kn-font-heading: 'Figtree', system-ui, -apple-system, sans-serif;
+  --kn-font-body:    'Figtree', system-ui, -apple-system, sans-serif;
+  --kn-font-mono:    ui-monospace, Consolas, 'Courier New', monospace;
+
+  --kn-text-xs:   0.75rem;
+  --kn-text-sm:   0.875rem;
+  --kn-text-base: 1rem;
+  --kn-text-lg:   1.125rem;
+  --kn-text-xl:   1.25rem;
+  --kn-text-2xl:  1.5rem;
+
+  --kn-weight-normal:   400;
+  --kn-weight-medium:   500;
+  --kn-weight-semibold: 600;
+  --kn-weight-bold:     700;
+
+  /* ── Spacing (4 px base) ── */
+  --kn-spacing-1:  0.25rem;
+  --kn-spacing-2:  0.5rem;
+  --kn-spacing-3:  0.75rem;
+  --kn-spacing-4:  1rem;
+  --kn-spacing-5:  1.25rem;
+  --kn-spacing-6:  1.5rem;
+  --kn-spacing-7:  1.75rem;
+  --kn-spacing-8:  2rem;
+  --kn-spacing-10: 2.5rem;
+  --kn-spacing-12: 3rem;
+
+  /* ── Border radius ── */
+  --kn-radius-sm:   4px;
+  --kn-radius-md:   8px;
+  --kn-radius-lg:   12px;
+  --kn-radius-full: 9999px;
+
+  /* ── Shadows ── */
+  --kn-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.05);
+  --kn-shadow-md: 0 4px 8px rgba(0, 0, 0, 0.10), 0 2px 4px rgba(0, 0, 0, 0.06);
+  --kn-shadow-lg: 0 10px 20px rgba(0, 0, 0, 0.12), 0 4px 6px rgba(0, 0, 0, 0.08);
+
+  /* ── Transitions ── */
+  --kn-transition-fast: 0.10s ease;
+  --kn-transition-base: 0.20s ease;
+  --kn-transition-slow: 0.35s ease;
+}
+
+/* ── Dark-mode token overrides ── */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --kn-bg:             #16171d;
+    --kn-surface:        #1f2028;
+    --kn-surface-alt:    #252630;
+    --kn-text-primary:   #f3f4f6;
+    --kn-text-secondary: #9ca3af;
+    --kn-text-muted:     #6b7280;
+    --kn-border:         #2e303a;
+    --kn-border-strong:  #3d3f4d;
+
+    --kn-primary:        #8b1a1a;
+    --kn-primary-bg:     rgba(91, 1, 1, 0.15);
+    --kn-primary-border: rgba(139, 26, 26, 0.35);
+
+    --kn-secondary:        #c2d89e;
+    --kn-secondary-bg:     rgba(167, 195, 122, 0.15);
+    --kn-secondary-border: rgba(167, 195, 122, 0.38);
+
+    --kn-accent:        #c4d4eb;
+    --kn-accent-bg:     rgba(167, 186, 218, 0.18);
+    --kn-accent-border: rgba(167, 186, 218, 0.45);
+
+    --kn-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.30), 0 1px 2px rgba(0, 0, 0, 0.20);
+    --kn-shadow-md: 0 4px 8px rgba(0, 0, 0, 0.35), 0 2px 4px rgba(0, 0, 0, 0.20);
+    --kn-shadow-lg: 0 10px 20px rgba(0, 0, 0, 0.40), 0 4px 6px rgba(0, 0, 0, 0.25);
+  }
+}

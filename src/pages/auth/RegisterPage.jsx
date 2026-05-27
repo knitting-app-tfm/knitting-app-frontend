@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import RegisterForm from "../../components/auth/RegisterForm";
 import { registerWithEmail } from "../../services/authService";
+import "./RegisterPage.css";
 
 function RegisterPage() {
   const [loading, setLoading] = useState(false);
@@ -22,12 +23,18 @@ function RegisterPage() {
   };
 
   return (
-    <div>
-      <h2 className="mb-4">Create account</h2>
-      <RegisterForm onSubmit={handleSubmit} loading={loading} error={error} />
-      <p className="mt-3 text-muted">
-        Already have an account? <span className="text-muted">Sign in</span>
-      </p>
+    <div className="register-page">
+      <div className="register-card">
+        <h1 className="register-card__title">Create account</h1>
+        <p className="register-card__subtitle">Start organizing your knitting patterns.</p>
+
+        <RegisterForm onSubmit={handleSubmit} loading={loading} error={error} />
+
+        <p className="register-card__footer">
+          Already have an account?{" "}
+          <Link to="/" className="register-card__link">Sign in</Link>
+        </p>
+      </div>
     </div>
   );
 }

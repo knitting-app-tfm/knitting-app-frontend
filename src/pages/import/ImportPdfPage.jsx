@@ -22,17 +22,22 @@ function ImportPdfPage() {
   };
 
   return (
-    <div>
-      <nav aria-label="breadcrumb" className="mb-4">
-        <ol className="breadcrumb">
-          <li className="breadcrumb-item">
-            <Link to="/import">Import</Link>
-          </li>
-          <li className="breadcrumb-item active">PDF</li>
-        </ol>
+    <div style={{ maxWidth: "600px" }}>
+      <nav className="kn-breadcrumb" aria-label="breadcrumb">
+        <Link to="/import">Import</Link>
+        <span className="kn-breadcrumb__sep">/</span>
+        <span className="kn-breadcrumb__current">PDF</span>
       </nav>
-      <h2 className="mb-4">Import pattern from PDF</h2>
-      {error && <div className="alert alert-danger">{error}</div>}
+
+      <h1 className="kn-page-title">Upload a PDF pattern</h1>
+      <p className="kn-page-subtitle">
+        Upload your PDF pattern to extract its key details.
+      </p>
+
+      {error && (
+        <div className="alert alert-danger mb-4" role="alert">{error}</div>
+      )}
+
       <ImportPdfForm onSubmit={handleSubmit} loading={loading} />
     </div>
   );

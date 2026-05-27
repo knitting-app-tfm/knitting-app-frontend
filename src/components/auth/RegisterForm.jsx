@@ -87,7 +87,7 @@ function RegisterForm({ onSubmit, loading, error: serverError }) {
 
       <button
         type="submit"
-        className="btn btn-primary w-100"
+        className="btn btn-primary-custom w-100"
         disabled={!email || !password || !username || loading}
       >
         {loading ? (

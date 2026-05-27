@@ -7,6 +7,12 @@ export default defineConfig({
   server: {
     host: "0.0.0.0",
     port: 5173,
+    proxy: {
+      "/patterns":      { target: "http://localhost:8000", changeOrigin: true },
+      "/abbreviations": { target: "http://localhost:8000", changeOrigin: true },
+      "/auth":          { target: "http://localhost:8000", changeOrigin: true },
+      "/media":         { target: "http://localhost:8000", changeOrigin: true },
+    },
   },
   test: {
     environment: "jsdom",
