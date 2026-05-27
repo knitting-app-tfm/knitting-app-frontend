@@ -1,18 +1,42 @@
 /* ── Text colors ── */
-.text-primary-kn   { color: var(--kn-primary) !important; }
-.text-secondary-kn { color: var(--kn-secondary) !important; }
-.text-accent-kn    { color: var(--kn-accent) !important; }
-.text-muted-kn     { color: var(--kn-text-muted) !important; }
+.text-primary-kn {
+  color: var(--kn-primary) !important;
+}
+.text-secondary-kn {
+  color: var(--kn-secondary) !important;
+}
+.text-accent-kn {
+  color: var(--kn-accent) !important;
+}
+.text-muted-kn {
+  color: var(--kn-text-muted) !important;
+}
 
 /* ── Background colors ── */
-.bg-primary-kn     { background-color: var(--kn-primary) !important; }
-.bg-primary-soft   { background-color: var(--kn-primary-bg) !important; }
-.bg-secondary-kn   { background-color: var(--kn-secondary) !important; }
-.bg-secondary-soft { background-color: var(--kn-secondary-bg) !important; }
-.bg-accent-kn      { background-color: var(--kn-accent) !important; }
-.bg-accent-soft    { background-color: var(--kn-accent-bg) !important; }
-.bg-surface        { background-color: var(--kn-surface) !important; }
-.bg-surface-alt    { background-color: var(--kn-surface-alt) !important; }
+.bg-primary-kn {
+  background-color: var(--kn-primary) !important;
+}
+.bg-primary-soft {
+  background-color: var(--kn-primary-bg) !important;
+}
+.bg-secondary-kn {
+  background-color: var(--kn-secondary) !important;
+}
+.bg-secondary-soft {
+  background-color: var(--kn-secondary-bg) !important;
+}
+.bg-accent-kn {
+  background-color: var(--kn-accent) !important;
+}
+.bg-accent-soft {
+  background-color: var(--kn-accent-bg) !important;
+}
+.bg-surface {
+  background-color: var(--kn-surface) !important;
+}
+.bg-surface-alt {
+  background-color: var(--kn-surface-alt) !important;
+}
 
 /* ── Custom buttons ── */
 .btn-primary-custom {
@@ -143,14 +167,14 @@
 
 /* technique / técnica — teal */
 .badge-kn--technique {
-  background: rgba(16, 140, 120, 0.10);
+  background: rgba(16, 140, 120, 0.1);
   color: #0c7a6b;
   border-color: rgba(16, 140, 120, 0.28);
 }
 
 /* finishing / remate — amber */
 .badge-kn--finishing {
-  background: rgba(180, 100, 20, 0.10);
+  background: rgba(180, 100, 20, 0.1);
   color: #9a5810;
   border-color: rgba(180, 100, 20, 0.28);
 }

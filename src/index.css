@@ -1,7 +1,7 @@
 /* ── Global style system ── */
-@import './styles/variables.css';
-@import './styles/base.css';
-@import './styles/utilities.css';
+@import "./styles/variables.css";
+@import "./styles/base.css";
+@import "./styles/utilities.css";
 
 /*
   Backward-compatibility aliases.
@@ -9,19 +9,19 @@
   Migrate them progressively to --kn- variables.
 */
 :root {
-  --text:        var(--kn-text-secondary);
-  --text-h:      var(--kn-text-primary);
-  --bg:          var(--kn-surface);
-  --border:      var(--kn-border);
-  --code-bg:     var(--kn-surface-alt);
-  --accent:      var(--kn-secondary);
-  --accent-bg:   var(--kn-secondary-bg);
+  --text: var(--kn-text-secondary);
+  --text-h: var(--kn-text-primary);
+  --bg: var(--kn-surface);
+  --border: var(--kn-border);
+  --code-bg: var(--kn-surface-alt);
+  --accent: var(--kn-secondary);
+  --accent-bg: var(--kn-secondary-bg);
   --accent-border: var(--kn-secondary-border);
-  --sans:        var(--kn-font-body);
-  --heading:     var(--kn-font-heading);
-  --mono:        var(--kn-font-mono);
-  --shadow:      var(--kn-shadow-lg);
-  --social-bg:   var(--kn-surface-alt);
+  --sans: var(--kn-font-body);
+  --heading: var(--kn-font-heading);
+  --mono: var(--kn-font-mono);
+  --shadow: var(--kn-shadow-lg);
+  --social-bg: var(--kn-surface-alt);
 }
 
 /* ── App root ── */

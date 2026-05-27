@@ -22,7 +22,11 @@
 .pd-hero__overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(to top, rgba(0,0,0,0.78) 0%, rgba(0,0,0,0.05) 55%);
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.78) 0%,
+    rgba(0, 0, 0, 0.05) 55%
+  );
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
@@ -64,7 +68,7 @@
   width: 280px;
   height: 280px;
   border-radius: 50%;
-  background: rgba(255,255,255,0.06);
+  background: rgba(255, 255, 255, 0.06);
   pointer-events: none;
 }
 
@@ -98,9 +102,9 @@
 
 /* On colored backgrounds (hero/header) */
 .pd-badge--light {
-  background: rgba(255,255,255,0.18);
+  background: rgba(255, 255, 255, 0.18);
   color: #fff;
-  border: 1px solid rgba(255,255,255,0.35);
+  border: 1px solid rgba(255, 255, 255, 0.35);
   backdrop-filter: blur(4px);
 }
 
@@ -175,7 +179,9 @@
 }
 
 @media (max-width: 560px) {
-  .pd-gauge-layout { grid-template-columns: 1fr; }
+  .pd-gauge-layout {
+    grid-template-columns: 1fr;
+  }
 }
 
 .pd-gauge-diagram svg {
@@ -206,10 +212,18 @@
   flex-shrink: 0;
 }
 
-.pd-stat__dot--primary  { background: var(--kn-primary); }
-.pd-stat__dot--green    { background: var(--kn-secondary-dark); }
-.pd-stat__dot--accent   { background: var(--kn-accent-dark); }
-.pd-stat__dot--neutral  { background: var(--kn-text-muted); }
+.pd-stat__dot--primary {
+  background: var(--kn-primary);
+}
+.pd-stat__dot--green {
+  background: var(--kn-secondary-dark);
+}
+.pd-stat__dot--accent {
+  background: var(--kn-accent-dark);
+}
+.pd-stat__dot--neutral {
+  background: var(--kn-text-muted);
+}
 
 .pd-stat__value {
   font-size: 1.35rem;
@@ -266,7 +280,9 @@
   margin-bottom: var(--kn-spacing-3);
 }
 
-.pd-yarn-card:last-child { margin-bottom: 0; }
+.pd-yarn-card:last-child {
+  margin-bottom: 0;
+}
 
 .pd-yarn-card__head {
   display: flex;
@@ -314,7 +330,9 @@
   transition: background var(--kn-transition-fast);
 }
 
-.pd-weight__dot--on { background: var(--kn-secondary-dark); }
+.pd-weight__dot--on {
+  background: var(--kn-secondary-dark);
+}
 
 .pd-weight__label {
   font-size: 0.72rem;

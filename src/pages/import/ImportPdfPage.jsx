@@ -35,7 +35,9 @@ function ImportPdfPage() {
       </p>
 
       {error && (
-        <div className="alert alert-danger mb-4" role="alert">{error}</div>
+        <div className="alert alert-danger mb-4" role="alert">
+          {error}
+        </div>
       )}
 
       <ImportPdfForm onSubmit={handleSubmit} loading={loading} />

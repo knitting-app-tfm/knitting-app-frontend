@@ -112,7 +112,9 @@
   gap: var(--kn-spacing-2);
   color: var(--kn-text-muted);
   cursor: pointer;
-  transition: background var(--kn-transition-fast), border-color var(--kn-transition-fast);
+  transition:
+    background var(--kn-transition-fast),
+    border-color var(--kn-transition-fast);
   position: relative;
 }
 
@@ -131,7 +133,7 @@
 .cp-photo-preview__overlay {
   position: absolute;
   inset: 0;
-  background: rgba(0,0,0,0.35);
+  background: rgba(0, 0, 0, 0.35);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -290,7 +292,9 @@
   font-weight: 600;
   padding: 0.25rem 0.625rem;
   cursor: pointer;
-  transition: color var(--kn-transition-fast), border-color var(--kn-transition-fast);
+  transition:
+    color var(--kn-transition-fast),
+    border-color var(--kn-transition-fast);
 }
 
 .cp-yarn-remove:hover {

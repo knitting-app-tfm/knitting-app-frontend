@@ -166,7 +166,9 @@
   color: var(--kn-text-muted);
   font-size: 1.1rem;
   flex-shrink: 0;
-  transition: transform var(--kn-transition-fast), color var(--kn-transition-fast);
+  transition:
+    transform var(--kn-transition-fast),
+    color var(--kn-transition-fast);
 }
 
 .home-tile:hover .home-tile__arrow {

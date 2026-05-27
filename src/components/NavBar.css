@@ -15,7 +15,7 @@
 }
 
 .navbar-kn .navbar-brand:hover {
-  opacity: 0.80;
+  opacity: 0.8;
   color: #ffffff;
 }
 
@@ -25,7 +25,9 @@
   font-size: 0.95rem;
   padding: 0.45rem 0.75rem;
   border-radius: var(--kn-radius-md);
-  transition: color var(--kn-transition-fast), background var(--kn-transition-fast);
+  transition:
+    color var(--kn-transition-fast),
+    background var(--kn-transition-fast);
 }
 
 .navbar-kn .nav-link:hover {
@@ -56,7 +58,7 @@
 
 /* Mobile toggle */
 .navbar-kn .navbar-toggler {
-  border-color: rgba(255, 255, 255, 0.30);
+  border-color: rgba(255, 255, 255, 0.3);
   padding: 0.25rem 0.5rem;
   border-radius: var(--kn-radius-sm);
 }

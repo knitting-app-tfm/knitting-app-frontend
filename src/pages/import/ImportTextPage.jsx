@@ -35,7 +35,9 @@ function ImportTextPage() {
       </p>
 
       {error && (
-        <div className="alert alert-danger mb-4" role="alert">{error}</div>
+        <div className="alert alert-danger mb-4" role="alert">
+          {error}
+        </div>
       )}
 
       <ImportTextForm onSubmit={handleSubmit} loading={loading} />
