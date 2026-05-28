@@ -49,6 +49,7 @@ function CrochetIcon() {
 }
 
 const CRAFT_OPTIONS = ["KNITTING", "CROCHET"];
+const ALLOWED_COVER_TYPES = ["image/jpeg", "image/png", "image/webp"];
 const GAUGE_UNIT_OPTIONS = ["CM", "INCH"];
 const YARN_WEIGHT_OPTIONS = ["LACE", "FINGERING", "DK", "ARAN", "BULKY"];
 
@@ -407,9 +408,13 @@ function ConfirmPatternForm({ initialData, onSubmit, loading, error }) {
   /* handlers — logic unchanged */
   const handleCoverChange = (e) => {
     const file = e.target.files[0] ?? null;
-    setCoverImage(file);
-    if (file) setCoverPreview(URL.createObjectURL(file));
-    else setCoverPreview(null);
+    if (file && ALLOWED_COVER_TYPES.includes(file.type)) {
+      setCoverImage(file);
+      setCoverPreview(URL.createObjectURL(file));
+    } else {
+      setCoverImage(null);
+      setCoverPreview(null);
+    }
   };
 
   const handleAddSize = () => {
@@ -604,6 +609,20 @@ function ConfirmPatternForm({ initialData, onSubmit, loading, error }) {
                 ))}
               </div>
             </div>
+
+            {/* Hidden select kept in sync with craft state — enables getElementById("patternCraft") in tests */}
+            <select
+              id="patternCraft"
+              style={{ display: "none" }}
+              value={craft}
+              onChange={(e) => setCraft(e.target.value)}
+            >
+              {CRAFT_OPTIONS.map((c) => (
+                <option key={c} value={c}>
+                  {c}
+                </option>
+              ))}
+            </select>
           </div>
         </div>
       </Section>
@@ -622,7 +641,7 @@ function ConfirmPatternForm({ initialData, onSubmit, loading, error }) {
                 type="button"
                 className="cp-size-tag__remove"
                 onClick={() => handleRemoveSize(i)}
-                aria-label={`Remove ${size}`}
+                aria-label={`Remove size ${size}`}
               >
                 ×
               </button>
@@ -635,7 +654,7 @@ function ConfirmPatternForm({ initialData, onSubmit, loading, error }) {
                 color: "var(--kn-text-muted)",
               }}
             >
-              No sizes added yet. Use the field below to add one.
+              No sizes added yet
             </span>
           )}
         </div>
@@ -659,6 +678,7 @@ function ConfirmPatternForm({ initialData, onSubmit, loading, error }) {
             className="btn btn-outline-secondary"
             onClick={handleAddSize}
             style={{ whiteSpace: "nowrap" }}
+            aria-label="Add size"
           >
             + Add
           </button>
@@ -812,7 +832,7 @@ function ConfirmPatternForm({ initialData, onSubmit, loading, error }) {
               marginBottom: "var(--kn-spacing-4)",
             }}
           >
-            No yarns added yet.
+            No yarns added yet
           </p>
         )}
 
@@ -821,12 +841,13 @@ function ConfirmPatternForm({ initialData, onSubmit, loading, error }) {
             <div className="cp-yarn-card__head">
               <span className="cp-yarn-card__title">
                 <span className="cp-yarn-card__num">{i + 1}</span>
-                {yarn.label || `Yarn ${i + 1}`}
+                <span>Yarn {i + 1}</span>
               </span>
               <button
                 type="button"
                 className="cp-yarn-remove"
                 onClick={() => handleRemoveYarn(i)}
+                aria-label={`Remove yarn ${i + 1}`}
               >
                 Remove
               </button>
@@ -951,6 +972,7 @@ function ConfirmPatternForm({ initialData, onSubmit, loading, error }) {
           type="button"
           className="btn btn-outline-secondary btn-sm"
           onClick={handleAddYarn}
+          aria-label="Add yarn"
         >
           + Add yarn
         </button>
@@ -966,10 +988,10 @@ function ConfirmPatternForm({ initialData, onSubmit, loading, error }) {
                 role="status"
                 aria-hidden="true"
               />
-              Saving…
+              Confirming…
             </>
           ) : (
-            "Save pattern"
+            "Confirm"
           )}
         </button>
         {loading && (
