@@ -96,7 +96,7 @@ function ImportPdfForm({ onSubmit, loading }) {
 
       <button
         type="submit"
-        className="btn btn-primary"
+        className="btn btn-primary-custom"
         disabled={!file || loading}
       >
         {loading ? (

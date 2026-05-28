@@ -22,21 +22,24 @@ function ImportTextPage() {
   };
 
   return (
-    <div>
-      <nav aria-label="breadcrumb" className="mb-4">
-        <ol className="breadcrumb">
-          <li className="breadcrumb-item">
-            <Link to="/import">Import</Link>
-          </li>
-          <li className="breadcrumb-item active">Text</li>
-        </ol>
+    <div style={{ maxWidth: "600px" }}>
+      <nav className="kn-breadcrumb" aria-label="breadcrumb">
+        <Link to="/import">Import</Link>
+        <span className="kn-breadcrumb__sep">/</span>
+        <span className="kn-breadcrumb__current">Plain text</span>
       </nav>
-      <h2 className="mb-4">Import pattern from plain text</h2>
+
+      <h1 className="kn-page-title">Paste your pattern</h1>
+      <p className="kn-page-subtitle">
+        Copy and paste your pattern's text here to extract its key details.
+      </p>
+
       {error && (
-        <div className="alert alert-danger" role="alert">
+        <div className="alert alert-danger mb-4" role="alert">
           {error}
         </div>
       )}
+
       <ImportTextForm onSubmit={handleSubmit} loading={loading} />
     </div>
   );

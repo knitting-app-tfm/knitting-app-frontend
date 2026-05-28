@@ -276,13 +276,13 @@ describe("ConfirmPatternForm", () => {
     fireEvent.change(screen.getByLabelText("Rows"), {
       target: { value: "32" },
     });
-    fireEvent.change(screen.getByLabelText("Size"), {
+    fireEvent.change(screen.getByLabelText("Gauge size"), {
       target: { value: "15" },
     });
     fireEvent.change(document.getElementById("gaugeUnit"), {
       target: { value: "INCH" },
     });
-    fireEvent.change(screen.getByLabelText("Needle size"), {
+    fireEvent.change(screen.getByLabelText("Needle / hook size"), {
       target: { value: "5mm" },
     });
     fireEvent.click(getConfirmButton());

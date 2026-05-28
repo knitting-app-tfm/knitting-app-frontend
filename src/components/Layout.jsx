@@ -1,12 +1,15 @@
 import { Outlet } from "react-router-dom";
 import NavBar from "./NavBar";
+import "./Layout.css";
 
 function Layout() {
   return (
     <>
       <NavBar />
-      <main className="px-4 py-4 text-start">
-        <Outlet />
+      <main className="kn-main">
+        <div className="kn-main__inner">
+          <Outlet />
+        </div>
       </main>
     </>
   );
