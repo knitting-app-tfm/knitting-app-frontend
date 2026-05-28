@@ -50,6 +50,7 @@ function CrochetIcon() {
 
 const CRAFT_OPTIONS = ["KNITTING", "CROCHET"];
 const ALLOWED_COVER_TYPES = ["image/jpeg", "image/png", "image/webp"];
+// keep in sync with ALLOWED_COVER_TYPES and the input's accept attribute
 const GAUGE_UNIT_OPTIONS = ["CM", "INCH"];
 const YARN_WEIGHT_OPTIONS = ["LACE", "FINGERING", "DK", "ARAN", "BULKY"];
 
@@ -404,16 +405,33 @@ function ConfirmPatternForm({ initialData, onSubmit, loading, error }) {
     (initialData?.yarns ?? []).map(normalizeYarn),
   );
   const [titleError, setTitleError] = useState(null);
+  const [coverImageError, setCoverImageError] = useState(null);
 
   /* handlers — logic unchanged */
+  const isAllowedImageFile = (file) => {
+    if (!(file instanceof File)) return false;
+    const allowedMime = ALLOWED_COVER_TYPES.includes(file.type);
+    const allowedExt = /\.(png|jpe?g|webp)$/i.test(file.name || "");
+    return allowedMime && allowedExt && file.size > 0;
+  };
+
   const handleCoverChange = (e) => {
     const file = e.target.files[0] ?? null;
-    if (file && ALLOWED_COVER_TYPES.includes(file.type)) {
+    if (file && isAllowedImageFile(file)) {
+      setCoverImageError(null);
       setCoverImage(file);
-      setCoverPreview(URL.createObjectURL(file));
+      setCoverPreview((prev) => {
+        if (prev) URL.revokeObjectURL(prev);
+        return URL.createObjectURL(file);
+      });
     } else {
+      if (file)
+        setCoverImageError("Only JPG, PNG and WebP images are allowed.");
       setCoverImage(null);
-      setCoverPreview(null);
+      setCoverPreview((prev) => {
+        if (prev) URL.revokeObjectURL(prev);
+        return null;
+      });
     }
   };
 
@@ -471,7 +489,7 @@ function ConfirmPatternForm({ initialData, onSubmit, loading, error }) {
             <input
               id="coverImage"
               type="file"
-              accept="image/*"
+              accept="image/jpeg,image/png,image/webp"
               className="d-none"
               onChange={handleCoverChange}
             />
@@ -522,8 +540,21 @@ function ConfirmPatternForm({ initialData, onSubmit, loading, error }) {
                 margin: 0,
               }}
             >
-              Optional · JPG, PNG, WEBP
+              Optional · JPG · PNG · WebP
             </p>
+            {coverImageError && (
+              <p
+                style={{
+                  fontSize: "0.78rem",
+                  color: "var(--kn-danger, #dc3545)",
+                  textAlign: "center",
+                  margin: "var(--kn-spacing-2) 0 0",
+                }}
+                role="alert"
+              >
+                {coverImageError}
+              </p>
+            )}
           </div>
 
           {/* Fields */}
