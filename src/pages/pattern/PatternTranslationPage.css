@@ -1,0 +1,86 @@
+/* ── Card (mirrors pd-section) ── */
+.pt-card {
+  background: var(--kn-surface);
+  border: 1.5px solid var(--kn-border);
+  border-radius: 20px;
+  overflow: hidden;
+  margin-bottom: var(--kn-spacing-6);
+}
+
+.pt-card__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--kn-spacing-5) var(--kn-spacing-6);
+  border-bottom: 1.5px solid var(--kn-border);
+  background: var(--kn-bg);
+}
+
+.pt-card__label {
+  font-size: var(--kn-text-sm);
+  font-weight: 700;
+  color: var(--kn-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+/* ── View original button ── */
+.pt-original-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--kn-spacing-2);
+  background: none;
+  border: 1.5px solid var(--kn-border);
+  border-radius: var(--kn-radius-full);
+  color: var(--kn-text-secondary);
+  font-size: var(--kn-text-sm);
+  font-weight: 600;
+  padding: 0.35rem 1rem;
+  cursor: pointer;
+  transition:
+    border-color var(--kn-transition-fast),
+    color var(--kn-transition-fast);
+}
+
+.pt-original-btn:hover:not(:disabled) {
+  border-color: var(--kn-primary);
+  color: var(--kn-primary);
+}
+
+.pt-original-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* ── Translated pattern lines ── */
+.pt-pattern {
+  padding: var(--kn-spacing-6);
+  font-family: var(--kn-font-body);
+  font-size: var(--kn-text-base);
+  line-height: 1.9;
+  color: var(--kn-text-primary);
+}
+
+.pt-line {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3em;
+  align-items: baseline;
+  min-height: 1.9em;
+}
+
+.pt-line--blank {
+  min-height: 1em;
+}
+
+/* ── Original pattern text ── */
+.pt-original-text {
+  padding: var(--kn-spacing-6);
+  margin: 0;
+  font-family: var(--kn-font-mono);
+  font-size: var(--kn-text-sm);
+  line-height: 1.7;
+  color: var(--kn-text-secondary);
+  white-space: pre-wrap;
+  overflow-x: auto;
+}

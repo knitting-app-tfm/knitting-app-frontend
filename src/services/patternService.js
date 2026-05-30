@@ -67,6 +67,22 @@ export async function translatePattern(patternId) {
   return response.json();
 }
 
+export async function getPatternOriginalText(patternId) {
+  const pattern = await getPattern(patternId);
+  const path = pattern.original_text_path;
+  if (!path) {
+    throw new Error("No original text available for this pattern");
+  }
+  const url = path.startsWith("http")
+    ? path
+    : `${API_URL}${path.startsWith("/") ? path : `/${path}`}`;
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error("Could not load original pattern text");
+  }
+  return response.text();
+}
+
 export async function importPatternFromText(text) {
   const response = await fetch(`${API_URL}/patterns/import/text`, {
     method: "POST",

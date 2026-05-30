@@ -1,0 +1,31 @@
+.tr-abbr {
+  cursor: pointer;
+  border-radius: var(--kn-radius-sm);
+  padding: 0.05em 0.35em;
+  font-weight: 600;
+  transition:
+    background var(--kn-transition-fast),
+    color var(--kn-transition-fast);
+}
+
+.tr-abbr--translated {
+  background: var(--kn-primary-bg);
+  color: var(--kn-primary);
+  text-decoration: underline;
+}
+
+.tr-abbr--translated:hover {
+  background: var(--kn-primary);
+  color: #fff;
+}
+
+.tr-abbr--untranslated {
+  background: var(--kn-accent-bg);
+  color: var(--kn-accent-dark);
+  text-decoration: underline dashed;
+}
+
+.tr-abbr--untranslated:hover {
+  background: var(--kn-accent-dark);
+  color: #fff;
+}

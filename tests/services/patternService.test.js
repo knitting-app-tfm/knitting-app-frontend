@@ -5,6 +5,7 @@ import {
   getPattern,
   confirmPattern,
   translatePattern,
+  getPatternOriginalText,
 } from "../../src/services/patternService";
 
 const API_URL = "http://localhost:8000";
@@ -237,6 +238,97 @@ describe("translatePattern", () => {
 
     await expect(translatePattern("42")).rejects.toThrow(
       "Error al traducir el patrón",
+    );
+  });
+});
+
+describe("getPatternOriginalText", () => {
+  function mockFetchSequence(...responses) {
+    const fn = vi.fn();
+    responses.forEach((r) => fn.mockResolvedValueOnce(r));
+    return fn;
+  }
+
+  it("fetches the original text from an absolute http URL in original_text_path", async () => {
+    const textUrl = "http://storage.example.com/patterns/42.txt";
+    vi.stubGlobal(
+      "fetch",
+      mockFetchSequence(
+        {
+          ok: true,
+          json: () =>
+            Promise.resolve({ id: "42", original_text_path: textUrl }),
+        },
+        { ok: true, text: () => Promise.resolve("CO 20 sts") },
+      ),
+    );
+
+    const result = await getPatternOriginalText("42");
+
+    expect(result).toBe("CO 20 sts");
+  });
+
+  it("constructs the URL from a slash-prefixed path", async () => {
+    const fetchMock = mockFetchSequence(
+      {
+        ok: true,
+        json: () =>
+          Promise.resolve({ id: "42", original_text_path: "/media/42.txt" }),
+      },
+      { ok: true, text: () => Promise.resolve("K2, P2") },
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    await getPatternOriginalText("42");
+
+    expect(fetchMock).toHaveBeenNthCalledWith(2, `${API_URL}/media/42.txt`);
+  });
+
+  it("constructs the URL from a bare path without a leading slash", async () => {
+    const fetchMock = mockFetchSequence(
+      {
+        ok: true,
+        json: () =>
+          Promise.resolve({ id: "42", original_text_path: "media/42.txt" }),
+      },
+      { ok: true, text: () => Promise.resolve("K2, P2") },
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    await getPatternOriginalText("42");
+
+    expect(fetchMock).toHaveBeenNthCalledWith(2, `${API_URL}/media/42.txt`);
+  });
+
+  it("throws when original_text_path is missing from the pattern", async () => {
+    vi.stubGlobal(
+      "fetch",
+      mockFetchSequence({
+        ok: true,
+        json: () => Promise.resolve({ id: "42", original_text_path: null }),
+      }),
+    );
+
+    await expect(getPatternOriginalText("42")).rejects.toThrow(
+      "No original text available for this pattern",
+    );
+  });
+
+  it("throws when the text file fetch fails", async () => {
+    vi.stubGlobal(
+      "fetch",
+      mockFetchSequence(
+        {
+          ok: true,
+          json: () =>
+            Promise.resolve({ id: "42", original_text_path: "/media/42.txt" }),
+        },
+        { ok: false, text: () => Promise.resolve("") },
+      ),
+    );
+
+    await expect(getPatternOriginalText("42")).rejects.toThrow(
+      "Could not load original pattern text",
     );
   });
 });
