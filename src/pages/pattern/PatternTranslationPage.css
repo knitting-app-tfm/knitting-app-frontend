@@ -73,6 +73,42 @@
   min-height: 1em;
 }
 
+/* ── Abbreviation detail panel ── */
+.pt-detail-col {
+  position: fixed;
+  top: 0;
+  right: 0;
+  height: 100vh;
+  width: 0;
+  overflow: hidden;
+  transition: width var(--kn-transition-base);
+  z-index: 200;
+  background: var(--kn-surface);
+  border-left: 1px solid var(--kn-border);
+  box-shadow: -4px 0 24px rgba(0, 0, 0, 0.08);
+}
+
+.pt-detail-col--open {
+  width: 360px;
+  overflow-y: auto;
+  padding: var(--kn-spacing-6);
+}
+
+.pt-detail-col .dict-detail {
+  position: relative;
+  top: auto;
+  border: none;
+  padding: 0;
+  background: transparent;
+}
+
+.pt-detail-loading {
+  display: flex;
+  justify-content: center;
+  padding: var(--kn-spacing-8);
+  color: var(--kn-text-secondary);
+}
+
 /* ── Original pattern text ── */
 .pt-original-text {
   padding: var(--kn-spacing-6);

@@ -1,6 +1,6 @@
 import "./TokenRenderer.css";
 
-function TokenRenderer({ token }) {
+function TokenRenderer({ token, onAbbreviationClick }) {
   if (token.type === "text") {
     return <span>{token.value}</span>;
   }
@@ -22,7 +22,12 @@ function TokenRenderer({ token }) {
   if (token.type === "abbreviation") {
     if (token.translated) {
       return (
-        <span className="tr-abbr tr-abbr--translated">{token.full_name}</span>
+        <span
+          className="tr-abbr tr-abbr--translated"
+          onClick={() => onAbbreviationClick?.(token.code)}
+        >
+          {token.full_name}
+        </span>
       );
     }
     return <span className="tr-abbr tr-abbr--untranslated">{token.code}</span>;

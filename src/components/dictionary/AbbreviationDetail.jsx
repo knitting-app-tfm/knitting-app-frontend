@@ -1,3 +1,5 @@
+import "./AbbreviationDetail.css";
+
 function getYouTubeEmbedUrl(url) {
   if (!url) return null;
   const shortMatch = url.match(/youtu\.be\/([^?&]+)/);

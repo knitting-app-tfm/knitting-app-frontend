@@ -3,8 +3,10 @@ import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { createMemoryRouter, RouterProvider } from "react-router-dom";
 import PatternTranslationPage from "../../../src/pages/pattern/PatternTranslationPage";
 import * as patternService from "../../../src/services/patternService";
+import * as abbreviationService from "../../../src/services/abbreviationService";
 
 vi.mock("../../../src/services/patternService");
+vi.mock("../../../src/services/abbreviationService");
 
 const LINES = [
   {
@@ -201,5 +203,96 @@ describe("PatternTranslationPage", () => {
     expect(
       await screen.findByRole("button", { name: "View original pattern" }),
     ).not.toBeDisabled();
+  });
+
+  it("opens the detail panel with a spinner when a translated abbreviation is clicked", () => {
+    abbreviationService.getAbbreviationByCode.mockReturnValue(
+      new Promise(() => {}),
+    );
+
+    renderPage("42", { tokens: LINES });
+    fireEvent.click(screen.getByText("stitches"));
+
+    expect(document.querySelector(".pt-detail-col--open")).toBeInTheDocument();
+    expect(document.querySelector(".pt-detail-loading")).toBeInTheDocument();
+  });
+
+  it("shows the abbreviation detail in the panel after a successful load", async () => {
+    abbreviationService.getAbbreviationByCode.mockResolvedValue({
+      id: "1",
+      abbreviation: "sts",
+      full_name: "stitches",
+      craft: "KNITTING",
+      type: "STITCH",
+      description: "A basic knitting stitch",
+      video_link: null,
+    });
+
+    renderPage("42", { tokens: LINES });
+    fireEvent.click(screen.getByText("stitches"));
+
+    await waitFor(() => {
+      expect(screen.getByText("A basic knitting stitch")).toBeInTheDocument();
+    });
+  });
+
+  it("shows an error alert in the panel when loading the abbreviation detail fails", async () => {
+    abbreviationService.getAbbreviationByCode.mockRejectedValue(
+      new Error("Abbreviation not found"),
+    );
+
+    renderPage("42", { tokens: LINES });
+    fireEvent.click(screen.getByText("stitches"));
+
+    expect(
+      await screen.findByText("Abbreviation not found"),
+    ).toBeInTheDocument();
+  });
+
+  it("closes the detail panel when the close button is clicked", async () => {
+    abbreviationService.getAbbreviationByCode.mockResolvedValue({
+      id: "1",
+      abbreviation: "sts",
+      full_name: "stitches",
+      craft: "KNITTING",
+      type: "STITCH",
+      description: "A basic knitting stitch",
+      video_link: null,
+    });
+
+    renderPage("42", { tokens: LINES });
+    fireEvent.click(screen.getByText("stitches"));
+    await screen.findByText("A basic knitting stitch");
+
+    fireEvent.click(screen.getByRole("button", { name: "Close detail" }));
+
+    expect(
+      screen.queryByText("A basic knitting stitch"),
+    ).not.toBeInTheDocument();
+    expect(
+      document.querySelector(".pt-detail-col--open"),
+    ).not.toBeInTheDocument();
+  });
+
+  it("closes the detail panel when clicking outside it", async () => {
+    abbreviationService.getAbbreviationByCode.mockResolvedValue({
+      id: "1",
+      abbreviation: "sts",
+      full_name: "stitches",
+      craft: "KNITTING",
+      type: "STITCH",
+      description: "A basic knitting stitch",
+      video_link: null,
+    });
+
+    renderPage("42", { tokens: LINES });
+    fireEvent.click(screen.getByText("stitches"));
+    await screen.findByText("A basic knitting stitch");
+
+    fireEvent.mouseDown(screen.getByText("Cast on"));
+
+    expect(
+      screen.queryByText("A basic knitting stitch"),
+    ).not.toBeInTheDocument();
   });
 });

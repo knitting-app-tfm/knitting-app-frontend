@@ -1,5 +1,5 @@
-import { describe, it, expect } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { describe, it, expect, vi } from "vitest";
+import { render, screen, fireEvent } from "@testing-library/react";
 import TokenRenderer from "../../../src/components/translation/TokenRenderer";
 
 describe("TokenRenderer", () => {
@@ -51,6 +51,23 @@ describe("TokenRenderer", () => {
     );
     const el = screen.getByText("stitches");
     expect(el).toHaveClass("tr-abbr--translated");
+  });
+
+  it("calls onAbbreviationClick with the code when a translated abbreviation is clicked", () => {
+    const onAbbreviationClick = vi.fn();
+    render(
+      <TokenRenderer
+        token={{
+          type: "abbreviation",
+          code: "sts",
+          translated: true,
+          full_name: "stitches",
+        }}
+        onAbbreviationClick={onAbbreviationClick}
+      />,
+    );
+    fireEvent.click(screen.getByText("stitches"));
+    expect(onAbbreviationClick).toHaveBeenCalledWith("sts");
   });
 
   it("renders an untranslated abbreviation with its code and the untranslated class", () => {

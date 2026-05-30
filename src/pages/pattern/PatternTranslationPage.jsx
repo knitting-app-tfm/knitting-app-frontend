@@ -1,7 +1,9 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useParams, Link, useLocation } from "react-router-dom";
 import { getPatternOriginalText } from "../../services/patternService";
+import { getAbbreviationByCode } from "../../services/abbreviationService";
 import TokenRenderer from "../../components/translation/TokenRenderer";
+import AbbreviationDetail from "../../components/dictionary/AbbreviationDetail";
 import "./PatternDetailPage.css";
 import "./PatternTranslationPage.css";
 
@@ -13,6 +15,50 @@ function PatternTranslationPage() {
   const [originalText, setOriginalText] = useState(null);
   const [originalLoading, setOriginalLoading] = useState(false);
   const [originalError, setOriginalError] = useState(null);
+
+  const [selectedAbbr, setSelectedAbbr] = useState(null);
+  const [abbrLoading, setAbbrLoading] = useState(false);
+  const [abbrError, setAbbrError] = useState(null);
+  const detailRef = useRef(null);
+  const fetchCancelledRef = useRef(false);
+
+  const panelOpen = abbrLoading || selectedAbbr !== null || abbrError !== null;
+
+  useEffect(() => {
+    if (!panelOpen) return;
+    function handleMouseDown(e) {
+      if (detailRef.current && !detailRef.current.contains(e.target)) {
+        fetchCancelledRef.current = true;
+        setSelectedAbbr(null);
+        setAbbrError(null);
+        setAbbrLoading(false);
+      }
+    }
+    document.addEventListener("mousedown", handleMouseDown);
+    return () => document.removeEventListener("mousedown", handleMouseDown);
+  }, [panelOpen]);
+
+  async function handleAbbreviationClick(code) {
+    fetchCancelledRef.current = false;
+    setSelectedAbbr(null);
+    setAbbrError(null);
+    setAbbrLoading(true);
+    try {
+      const abbr = await getAbbreviationByCode(code);
+      if (!fetchCancelledRef.current) setSelectedAbbr(abbr);
+    } catch (err) {
+      if (!fetchCancelledRef.current) setAbbrError(err.message);
+    } finally {
+      if (!fetchCancelledRef.current) setAbbrLoading(false);
+    }
+  }
+
+  function handleCloseDetail() {
+    fetchCancelledRef.current = true;
+    setSelectedAbbr(null);
+    setAbbrError(null);
+    setAbbrLoading(false);
+  }
 
   async function handleViewOriginal() {
     if (originalText !== null) {
@@ -81,7 +127,11 @@ function PatternTranslationPage() {
             ) : (
               <div key={i} className="pt-line">
                 {lineTokens.tokens.map((token, j) => (
-                  <TokenRenderer key={j} token={token} />
+                  <TokenRenderer
+                    key={j}
+                    token={token}
+                    onAbbreviationClick={handleAbbreviationClick}
+                  />
                 ))}
               </div>
             ),
@@ -103,6 +153,30 @@ function PatternTranslationPage() {
           <pre className="pt-original-text">{originalText}</pre>
         </div>
       )}
+
+      <div
+        ref={detailRef}
+        className={`pt-detail-col${panelOpen ? " pt-detail-col--open" : ""}`}
+      >
+        {abbrLoading && (
+          <div className="pt-detail-loading">
+            <span
+              className="spinner-border spinner-border-sm"
+              role="status"
+              aria-hidden="true"
+            />
+          </div>
+        )}
+        {abbrError && (
+          <div className="alert alert-danger" role="alert">
+            {abbrError}
+          </div>
+        )}
+        <AbbreviationDetail
+          abbreviation={selectedAbbr}
+          onClose={handleCloseDetail}
+        />
+      </div>
     </div>
   );
 }
