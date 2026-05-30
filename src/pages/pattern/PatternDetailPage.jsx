@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { useParams, Link } from "react-router-dom";
-import { getPattern } from "../../services/patternService";
+import { useParams, Link, useNavigate } from "react-router-dom";
+import { getPattern, translatePattern } from "../../services/patternService";
 import "./PatternDetailPage.css";
 
 const BASE_URL = import.meta.env.VITE_API_URL ?? "";
@@ -281,9 +281,25 @@ function PdSection({ num, title, desc, children }) {
 /* ── Page ─────────────────────────────────────────────── */
 function PatternDetailPage() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [pattern, setPattern] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [translating, setTranslating] = useState(false);
+  const [translateError, setTranslateError] = useState(null);
+
+  async function handleTranslate() {
+    setTranslating(true);
+    setTranslateError(null);
+    try {
+      const tokens = await translatePattern(id);
+      navigate(`/patterns/${id}/translation`, { state: { tokens } });
+    } catch (err) {
+      setTranslateError(err.message);
+    } finally {
+      setTranslating(false);
+    }
+  }
 
   useEffect(() => {
     getPattern(id)
@@ -509,7 +525,7 @@ function PatternDetailPage() {
         </PdSection>
       )}
 
-      {/* ── Footer action ── */}
+      {/* ── Footer actions ── */}
       <div className="pd-actions">
         <Link to={`/patterns/${id}/confirm`} className="pd-edit-btn">
           <svg
@@ -528,7 +544,50 @@ function PatternDetailPage() {
           </svg>
           Edit metadata
         </Link>
+        <button
+          className="pd-translate-btn"
+          onClick={handleTranslate}
+          disabled={translating}
+        >
+          {translating ? (
+            <>
+              <span
+                className="spinner-border spinner-border-sm"
+                role="status"
+                aria-hidden="true"
+              />
+              Translating…
+            </>
+          ) : (
+            <>
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M5 8l6 6" />
+                <path d="M4 14l6-6 2-3" />
+                <path d="M2 5h12" />
+                <path d="M7 2h1" />
+                <path d="M22 22l-5-10-5 10" />
+                <path d="M14 18h6" />
+              </svg>
+              Translate pattern
+            </>
+          )}
+        </button>
       </div>
+      {translateError && (
+        <div className="alert alert-danger" role="alert">
+          {translateError}
+        </div>
+      )}
     </div>
   );
 }

@@ -507,4 +507,41 @@ describe("ConfirmPatternForm", () => {
     expect(yarns[1].label).toBe("Yarn B");
     expect(yarns[1].yarn_weight).toBe("ARAN");
   });
+
+  it("shows an error when an invalid image type is uploaded", () => {
+    render(
+      <ConfirmPatternForm
+        initialData={INITIAL_DATA}
+        onSubmit={vi.fn()}
+        loading={false}
+        error={null}
+      />,
+    );
+
+    const file = new File(["gif"], "cover.gif", { type: "image/gif" });
+    fireEvent.change(document.getElementById("coverImage"), {
+      target: { files: [file] },
+    });
+
+    expect(
+      screen.getByText("Only JPG, PNG and WebP images are allowed."),
+    ).toBeInTheDocument();
+  });
+
+  it("changes craft via the visual radio toggle", () => {
+    const onSubmit = vi.fn();
+    render(
+      <ConfirmPatternForm
+        initialData={INITIAL_DATA}
+        onSubmit={onSubmit}
+        loading={false}
+        error={null}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("radio", { name: /crochet/i }));
+    fireEvent.click(getConfirmButton());
+
+    expect(onSubmit.mock.calls[0][0].craft).toBe("CROCHET");
+  });
 });

@@ -8,6 +8,7 @@ import RegisterPage from "../pages/auth/RegisterPage";
 import ConfirmPatternPage from "../pages/confirm/ConfirmPatternPage";
 import DictionaryPage from "../pages/dictionary/DictionaryPage";
 import PatternDetailPage from "../pages/pattern/PatternDetailPage";
+import PatternTranslationPage from "../pages/pattern/PatternTranslationPage";
 
 const router = createBrowserRouter([
   {
@@ -20,6 +21,10 @@ const router = createBrowserRouter([
       { path: "/import/text", element: <ImportTextPage /> },
       { path: "/patterns/:id", element: <PatternDetailPage /> },
       { path: "/patterns/:id/confirm", element: <ConfirmPatternPage /> },
+      {
+        path: "/patterns/:id/translation",
+        element: <PatternTranslationPage />,
+      },
       { path: "/dictionary", element: <DictionaryPage /> },
     ],
   },

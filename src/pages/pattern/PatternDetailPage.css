@@ -400,3 +400,28 @@
   background: var(--kn-primary-light);
   color: #fff;
 }
+
+.pd-translate-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--kn-spacing-2);
+  background: var(--kn-secondary-dark);
+  color: #fff;
+  font-weight: 700;
+  font-size: var(--kn-text-sm);
+  padding: 0.6rem 1.5rem;
+  border-radius: var(--kn-radius-full);
+  border: none;
+  cursor: pointer;
+  transition: background var(--kn-transition-fast);
+}
+
+.pd-translate-btn:hover:not(:disabled) {
+  background: var(--kn-secondary);
+  color: var(--kn-text-primary);
+}
+
+.pd-translate-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
