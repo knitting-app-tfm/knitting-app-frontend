@@ -51,6 +51,22 @@ export async function importPatternFromPdf(file) {
   return response.json();
 }
 
+export async function translatePattern(patternId) {
+  const response = await fetch(`${API_URL}/patterns/${patternId}/translate`, {
+    method: "POST",
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    const detail = error.detail;
+    throw new Error(
+      typeof detail === "string" ? detail : "Error al traducir el patrón",
+    );
+  }
+
+  return response.json();
+}
+
 export async function importPatternFromText(text) {
   const response = await fetch(`${API_URL}/patterns/import/text`, {
     method: "POST",
