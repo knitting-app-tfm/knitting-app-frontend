@@ -1,0 +1,187 @@
+/* ── Text colors ── */
+.text-primary-kn {
+  color: var(--kn-primary) !important;
+}
+.text-secondary-kn {
+  color: var(--kn-secondary) !important;
+}
+.text-accent-kn {
+  color: var(--kn-accent) !important;
+}
+.text-muted-kn {
+  color: var(--kn-text-muted) !important;
+}
+
+/* ── Background colors ── */
+.bg-primary-kn {
+  background-color: var(--kn-primary) !important;
+}
+.bg-primary-soft {
+  background-color: var(--kn-primary-bg) !important;
+}
+.bg-secondary-kn {
+  background-color: var(--kn-secondary) !important;
+}
+.bg-secondary-soft {
+  background-color: var(--kn-secondary-bg) !important;
+}
+.bg-accent-kn {
+  background-color: var(--kn-accent) !important;
+}
+.bg-accent-soft {
+  background-color: var(--kn-accent-bg) !important;
+}
+.bg-surface {
+  background-color: var(--kn-surface) !important;
+}
+.bg-surface-alt {
+  background-color: var(--kn-surface-alt) !important;
+}
+
+/* ── Custom buttons ── */
+.btn-primary-custom {
+  background-color: var(--kn-primary);
+  border-color: var(--kn-primary);
+  color: #fff;
+  font-family: var(--kn-font-body);
+  font-weight: var(--kn-weight-medium);
+  transition:
+    background-color var(--kn-transition-fast),
+    border-color var(--kn-transition-fast);
+}
+
+.btn-primary-custom:hover,
+.btn-primary-custom:focus {
+  background-color: var(--kn-primary-dark);
+  border-color: var(--kn-primary-dark);
+  color: #fff;
+}
+
+.btn-secondary-custom {
+  background-color: var(--kn-secondary);
+  border-color: var(--kn-secondary);
+  color: #fff;
+  font-family: var(--kn-font-body);
+  font-weight: var(--kn-weight-medium);
+  transition:
+    background-color var(--kn-transition-fast),
+    border-color var(--kn-transition-fast);
+}
+
+.btn-secondary-custom:hover,
+.btn-secondary-custom:focus {
+  background-color: var(--kn-secondary-dark);
+  border-color: var(--kn-secondary-dark);
+  color: #fff;
+}
+
+.btn-outline-primary-custom {
+  background-color: transparent;
+  border: 1px solid var(--kn-primary);
+  color: var(--kn-primary);
+  font-family: var(--kn-font-body);
+  font-weight: var(--kn-weight-medium);
+  transition:
+    background-color var(--kn-transition-fast),
+    color var(--kn-transition-fast);
+}
+
+.btn-outline-primary-custom:hover {
+  background-color: var(--kn-primary-bg);
+  color: var(--kn-primary-dark);
+}
+
+.btn-outline-secondary-custom {
+  background-color: transparent;
+  border: 1px solid var(--kn-secondary);
+  color: var(--kn-secondary);
+  font-family: var(--kn-font-body);
+  font-weight: var(--kn-weight-medium);
+  transition:
+    background-color var(--kn-transition-fast),
+    color var(--kn-transition-fast);
+}
+
+.btn-outline-secondary-custom:hover {
+  background-color: var(--kn-secondary-bg);
+  color: var(--kn-secondary-dark);
+}
+
+/* ── Custom card ── */
+.card-custom {
+  background: var(--kn-surface);
+  border: 1px solid var(--kn-border);
+  border-radius: var(--kn-radius-lg);
+  padding: var(--kn-spacing-6);
+  box-shadow: var(--kn-shadow-sm);
+}
+
+.card-custom--hoverable {
+  transition:
+    box-shadow var(--kn-transition-base),
+    border-color var(--kn-transition-base);
+  cursor: pointer;
+}
+
+.card-custom--hoverable:hover {
+  background: #eeebe7;
+  box-shadow: var(--kn-shadow-md);
+}
+
+/* ──────────────────────────────────────────────
+   Dictionary abbreviation type badges
+   Usage: <span class="badge-kn badge-kn--knit">
+   ────────────────────────────────────────────── */
+.badge-kn {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--kn-spacing-1) var(--kn-spacing-3);
+  border-radius: var(--kn-radius-full);
+  font-size: var(--kn-text-xs);
+  font-weight: var(--kn-weight-medium);
+  letter-spacing: 0.04em;
+  border: 1px solid transparent;
+  line-height: 1.4;
+}
+
+/* knit / tricot — secondary (purple) */
+.badge-kn--knit {
+  background: var(--kn-secondary-bg);
+  color: var(--kn-secondary);
+  border-color: var(--kn-secondary-border);
+}
+
+/* crochet / ganchillo — primary (red) */
+.badge-kn--crochet {
+  background: var(--kn-primary-bg);
+  color: var(--kn-primary);
+  border-color: var(--kn-primary-border);
+}
+
+/* yarn / hilo — accent (brown) */
+.badge-kn--yarn {
+  background: var(--kn-accent-bg);
+  color: var(--kn-accent);
+  border-color: var(--kn-accent-border);
+}
+
+/* technique / técnica — teal */
+.badge-kn--technique {
+  background: rgba(16, 140, 120, 0.1);
+  color: #0c7a6b;
+  border-color: rgba(16, 140, 120, 0.28);
+}
+
+/* finishing / remate — amber */
+.badge-kn--finishing {
+  background: rgba(180, 100, 20, 0.1);
+  color: #9a5810;
+  border-color: rgba(180, 100, 20, 0.28);
+}
+
+/* general / neutro */
+.badge-kn--general {
+  background: var(--kn-surface-alt);
+  color: var(--kn-text-secondary);
+  border-color: var(--kn-border);
+}

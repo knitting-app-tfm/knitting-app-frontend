@@ -1,0 +1,74 @@
+/* ── Global style system ── */
+@import "./styles/variables.css";
+@import "./styles/base.css";
+@import "./styles/utilities.css";
+
+/*
+  Backward-compatibility aliases.
+  Page CSS files that still use the old variable names will continue to work.
+  Migrate them progressively to --kn- variables.
+*/
+:root {
+  --text: var(--kn-text-secondary);
+  --text-h: var(--kn-text-primary);
+  --bg: var(--kn-surface);
+  --border: var(--kn-border);
+  --code-bg: var(--kn-surface-alt);
+  --accent: var(--kn-secondary);
+  --accent-bg: var(--kn-secondary-bg);
+  --accent-border: var(--kn-secondary-border);
+  --sans: var(--kn-font-body);
+  --heading: var(--kn-font-heading);
+  --mono: var(--kn-font-mono);
+  --shadow: var(--kn-shadow-lg);
+  --social-bg: var(--kn-surface-alt);
+}
+
+/* ── App root ── */
+:root {
+  font: 18px/145% var(--kn-font-body);
+  letter-spacing: 0.18px;
+  color-scheme: light dark;
+  color: var(--kn-text-secondary);
+  background: var(--kn-bg);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+
+  @media (max-width: 1024px) {
+    font-size: 16px;
+  }
+}
+
+#root {
+  width: 100%;
+  max-width: 100%;
+  margin: 0 auto;
+  text-align: center;
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+}
+
+/* ── Inline code ── */
+code,
+.counter {
+  font-family: var(--kn-font-mono);
+  display: inline-flex;
+  border-radius: var(--kn-radius-sm);
+  color: var(--kn-text-primary);
+}
+
+code {
+  font-size: 15px;
+  line-height: 135%;
+  padding: var(--kn-spacing-1) var(--kn-spacing-2);
+  background: var(--kn-surface-alt);
+}
+
+/* ── Social icons: invert in dark mode ── */
+@media (prefers-color-scheme: dark) {
+  #social .button-icon {
+    filter: invert(1) brightness(2);
+  }
+}

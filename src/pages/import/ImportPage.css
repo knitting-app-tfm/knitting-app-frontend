@@ -1,0 +1,86 @@
+.import-page {
+  max-width: 900px;
+}
+
+.import-page__title {
+  font-size: 2rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--kn-text-primary);
+  margin-bottom: var(--kn-spacing-8);
+}
+
+/* ── Option cards ── */
+.import-options {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--kn-spacing-5);
+}
+
+@media (max-width: 640px) {
+  .import-options {
+    grid-template-columns: 1fr;
+  }
+}
+
+.import-option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  background: var(--kn-surface);
+  border: 1.5px solid var(--kn-border);
+  border-radius: 20px;
+  padding: var(--kn-spacing-10) var(--kn-spacing-6);
+  text-decoration: none;
+  gap: var(--kn-spacing-3);
+  min-height: 260px;
+  justify-content: center;
+  transition:
+    background var(--kn-transition-base),
+    box-shadow var(--kn-transition-base),
+    transform var(--kn-transition-base);
+}
+
+.import-option:not(.import-option--disabled):hover {
+  background: #eeebe7;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.07);
+  transform: translateY(-2px);
+  text-decoration: none;
+}
+
+.import-option--disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.import-option__icon {
+  width: 72px;
+  height: 72px;
+  border-radius: 18px;
+  background: var(--kn-primary-bg);
+  color: var(--kn-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: var(--kn-spacing-2);
+}
+
+.import-option--disabled .import-option__icon {
+  background: var(--kn-surface-alt);
+  color: var(--kn-text-muted);
+}
+
+.import-option__title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--kn-text-primary);
+  letter-spacing: -0.01em;
+}
+
+.import-option__desc {
+  font-size: var(--kn-text-sm);
+  color: var(--kn-text-muted);
+  line-height: 1.5;
+  max-width: 180px;
+}
