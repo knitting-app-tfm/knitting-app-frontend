@@ -24,6 +24,7 @@ const LINES = [
         code: "sts",
         translated: true,
         full_name: "stitches",
+        quantity: null,
       },
     ],
   },
@@ -31,7 +32,13 @@ const LINES = [
   {
     line: 3,
     tokens: [
-      { type: "abbreviation", code: "CO", translated: false, full_name: null },
+      {
+        type: "abbreviation",
+        code: "CO",
+        translated: false,
+        full_name: null,
+        quantity: null,
+      },
       { type: "number", value: 3.5, unit: "mm", scalable: false },
     ],
   },
@@ -294,5 +301,62 @@ describe("PatternTranslationPage", () => {
     expect(
       screen.queryByText("A basic knitting stitch"),
     ).not.toBeInTheDocument();
+  });
+
+  it("looks up the base code when quantity is not null (e.g. K23 → K)", async () => {
+    abbreviationService.getAbbreviationByCode.mockResolvedValue({
+      id: "2",
+      abbreviation: "K",
+      full_name: "knit",
+      craft: "KNITTING",
+      type: "STITCH",
+      description: "Knit stitch",
+      video_link: null,
+    });
+
+    const lines = [
+      {
+        line: 1,
+        tokens: [
+          {
+            type: "abbreviation",
+            code: "K23",
+            translated: true,
+            full_name: "knit",
+            quantity: 23,
+          },
+        ],
+      },
+    ];
+
+    renderPage("42", { tokens: lines });
+    fireEvent.click(screen.getByText("knit"));
+
+    await waitFor(() => {
+      expect(abbreviationService.getAbbreviationByCode).toHaveBeenCalledWith(
+        "K",
+      );
+    });
+  });
+
+  it("uses the code as-is when quantity is null", async () => {
+    abbreviationService.getAbbreviationByCode.mockResolvedValue({
+      id: "1",
+      abbreviation: "sts",
+      full_name: "stitches",
+      craft: "KNITTING",
+      type: "STITCH",
+      description: "A basic knitting stitch",
+      video_link: null,
+    });
+
+    renderPage("42", { tokens: LINES });
+    fireEvent.click(screen.getByText("stitches"));
+
+    await waitFor(() => {
+      expect(abbreviationService.getAbbreviationByCode).toHaveBeenCalledWith(
+        "sts",
+      );
+    });
   });
 });

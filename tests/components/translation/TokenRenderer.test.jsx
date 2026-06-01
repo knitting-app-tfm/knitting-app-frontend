@@ -53,21 +53,20 @@ describe("TokenRenderer", () => {
     expect(el).toHaveClass("tr-abbr--translated");
   });
 
-  it("calls onAbbreviationClick with the code when a translated abbreviation is clicked", () => {
+  it("calls onAbbreviationClick with the full token when a translated abbreviation is clicked", () => {
     const onAbbreviationClick = vi.fn();
+    const token = {
+      type: "abbreviation",
+      code: "sts",
+      translated: true,
+      full_name: "stitches",
+      quantity: null,
+    };
     render(
-      <TokenRenderer
-        token={{
-          type: "abbreviation",
-          code: "sts",
-          translated: true,
-          full_name: "stitches",
-        }}
-        onAbbreviationClick={onAbbreviationClick}
-      />,
+      <TokenRenderer token={token} onAbbreviationClick={onAbbreviationClick} />,
     );
     fireEvent.click(screen.getByText("stitches"));
-    expect(onAbbreviationClick).toHaveBeenCalledWith("sts");
+    expect(onAbbreviationClick).toHaveBeenCalledWith(token);
   });
 
   it("renders an untranslated abbreviation with its code and the untranslated class", () => {
@@ -90,5 +89,63 @@ describe("TokenRenderer", () => {
       <TokenRenderer token={{ type: "unknown_type" }} />,
     );
     expect(container.firstChild).toBeNull();
+  });
+
+  it("applies bold style when bold prop is true", () => {
+    render(
+      <TokenRenderer token={{ type: "text", value: "Row 1" }} bold={true} />,
+    );
+    expect(screen.getByText("Row 1")).toHaveStyle({ fontWeight: "bold" });
+  });
+
+  it("applies italic style when italic prop is true", () => {
+    render(
+      <TokenRenderer token={{ type: "text", value: "Note" }} italic={true} />,
+    );
+    expect(screen.getByText("Note")).toHaveStyle({ fontStyle: "italic" });
+  });
+
+  it("maps fontSize proportionally relative to a 10pt baseline", () => {
+    render(
+      <TokenRenderer
+        token={{ type: "text", value: "Heading" }}
+        fontSize={15}
+      />,
+    );
+    expect(screen.getByText("Heading")).toHaveStyle({ fontSize: "1.50em" });
+  });
+
+  it("clamps fontSize to 0.75em at the lower bound", () => {
+    render(
+      <TokenRenderer token={{ type: "text", value: "Tiny" }} fontSize={3} />,
+    );
+    expect(screen.getByText("Tiny")).toHaveStyle({ fontSize: "0.75em" });
+  });
+
+  it("clamps fontSize to 2.50em at the upper bound", () => {
+    render(
+      <TokenRenderer token={{ type: "text", value: "Giant" }} fontSize={50} />,
+    );
+    expect(screen.getByText("Giant")).toHaveStyle({ fontSize: "2.50em" });
+  });
+
+  it("does not apply fontSize style when fontSize prop is absent", () => {
+    render(<TokenRenderer token={{ type: "text", value: "Normal" }} />);
+    const el = screen.getByText("Normal");
+    expect(el.style.fontSize).toBe("");
+  });
+
+  it("applies formatting to number tokens", () => {
+    render(
+      <TokenRenderer
+        token={{ type: "number", value: 4, unit: "mm" }}
+        bold={true}
+        fontSize={12}
+      />,
+    );
+    expect(screen.getByText("4 mm")).toHaveStyle({
+      fontWeight: "bold",
+      fontSize: "1.20em",
+    });
   });
 });

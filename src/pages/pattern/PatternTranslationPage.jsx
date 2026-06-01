@@ -38,13 +38,15 @@ function PatternTranslationPage() {
     return () => document.removeEventListener("mousedown", handleMouseDown);
   }, [panelOpen]);
 
-  async function handleAbbreviationClick(code) {
+  async function handleAbbreviationClick(token) {
+    const lookupCode =
+      token.quantity !== null ? token.code.replace(/\d+$/, "") : token.code;
     fetchCancelledRef.current = false;
     setSelectedAbbr(null);
     setAbbrError(null);
     setAbbrLoading(true);
     try {
-      const abbr = await getAbbreviationByCode(code);
+      const abbr = await getAbbreviationByCode(lookupCode);
       if (!fetchCancelledRef.current) setSelectedAbbr(abbr);
     } catch (err) {
       if (!fetchCancelledRef.current) setAbbrError(err.message);
@@ -131,6 +133,9 @@ function PatternTranslationPage() {
                     key={j}
                     token={token}
                     onAbbreviationClick={handleAbbreviationClick}
+                    bold={lineTokens.bold}
+                    italic={lineTokens.italic}
+                    fontSize={lineTokens.font_size}
                   />
                 ))}
               </div>
