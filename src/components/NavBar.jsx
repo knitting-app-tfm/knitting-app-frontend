@@ -1,7 +1,86 @@
-import { NavLink } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
+import { NavLink, useNavigate } from "react-router-dom";
+import { useAuth } from "../context/useAuth";
 import "./NavBar.css";
 
+function UserMenu({ user, logout }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+  const navigate = useNavigate();
+  const displayName = user.displayName || user.email.split("@")[0];
+
+  useEffect(() => {
+    const handler = (e) => {
+      if (!ref.current?.contains(e.target)) setOpen(false);
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  const handleLogout = async () => {
+    setOpen(false);
+    await logout();
+    navigate("/login");
+  };
+
+  return (
+    <div className="nav-user" ref={ref}>
+      <button
+        className="nav-user__btn"
+        onClick={() => setOpen((v) => !v)}
+        aria-expanded={open}
+        aria-haspopup="true"
+      >
+        {displayName}
+        <svg
+          width="12"
+          height="12"
+          viewBox="0 0 12 12"
+          fill="currentColor"
+          aria-hidden="true"
+        >
+          <path d="M6 8L1 3h10L6 8z" />
+        </svg>
+      </button>
+
+      {open && (
+        <div className="nav-user__dropdown" role="menu">
+          <div className="nav-user__dropdown-header" aria-hidden="true">
+            <span className="nav-user__dropdown-name">{displayName}</span>
+            <span className="nav-user__dropdown-email">{user.email}</span>
+          </div>
+          <div className="nav-user__divider" />
+          <button
+            className="nav-user__dropdown-item"
+            role="menuitem"
+            onClick={handleLogout}
+          >
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+              <polyline points="16 17 21 12 16 7" />
+              <line x1="21" y1="12" x2="9" y2="12" />
+            </svg>
+            Log out
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function NavBar() {
+  const { user, logout } = useAuth();
+
   return (
     <nav className="navbar navbar-expand-lg navbar-kn" data-bs-theme="dark">
       <div className="container-xl">
@@ -35,12 +114,25 @@ function NavBar() {
             </li>
           </ul>
 
-          <ul className="navbar-nav ms-auto">
-            <li className="nav-item">
-              <NavLink className="nav-link nav-link--cta" to="/register">
-                Register
-              </NavLink>
-            </li>
+          <ul className="navbar-nav ms-auto align-items-center gap-2">
+            {user === undefined ? null : user === null ? (
+              <>
+                <li className="nav-item">
+                  <NavLink className="nav-link" to="/login">
+                    Log in
+                  </NavLink>
+                </li>
+                <li className="nav-item">
+                  <NavLink className="nav-link nav-link--cta" to="/register">
+                    Register
+                  </NavLink>
+                </li>
+              </>
+            ) : (
+              <li className="nav-item">
+                <UserMenu user={user} logout={logout} />
+              </li>
+            )}
           </ul>
         </div>
       </div>

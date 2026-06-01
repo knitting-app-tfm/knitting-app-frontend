@@ -1,10 +1,18 @@
 import { vi, describe, it, expect, beforeEach, afterEach } from "vitest";
-import { createUserWithEmailAndPassword } from "firebase/auth";
-import { registerWithEmail } from "../../src/services/authService";
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+} from "firebase/auth";
+import {
+  registerWithEmail,
+  loginWithEmail,
+} from "../../src/services/authService";
 
 vi.mock("../../src/services/firebase.js", () => ({ auth: {} }));
 vi.mock("firebase/auth", () => ({
   createUserWithEmailAndPassword: vi.fn(),
+  signInWithEmailAndPassword: vi.fn(),
+  updateProfile: vi.fn().mockResolvedValue(undefined),
 }));
 
 const API_URL = "http://localhost:8000";
@@ -118,5 +126,46 @@ describe("registerWithEmail", () => {
     await expect(
       registerWithEmail("test@example.com", "password123", "testuser"),
     ).rejects.toThrow("Username already taken");
+  });
+});
+
+describe("loginWithEmail", () => {
+  it("calls signInWithEmailAndPassword with email and password", async () => {
+    signInWithEmailAndPassword.mockResolvedValue({});
+
+    await loginWithEmail("test@example.com", "password123");
+
+    expect(signInWithEmailAndPassword).toHaveBeenCalledWith(
+      {},
+      "test@example.com",
+      "password123",
+    );
+  });
+
+  it("resolves without a value on success", async () => {
+    signInWithEmailAndPassword.mockResolvedValue({});
+
+    await expect(
+      loginWithEmail("test@example.com", "password123"),
+    ).resolves.toBeUndefined();
+  });
+
+  it("throws a friendly message for invalid credentials", async () => {
+    const firebaseError = Object.assign(new Error("Firebase error"), {
+      code: "auth/invalid-credential",
+    });
+    signInWithEmailAndPassword.mockRejectedValue(firebaseError);
+
+    await expect(
+      loginWithEmail("test@example.com", "wrongpassword"),
+    ).rejects.toThrow("Incorrect email or password.");
+  });
+
+  it("throws a generic message for unknown Firebase errors", async () => {
+    signInWithEmailAndPassword.mockRejectedValue(new Error("unknown error"));
+
+    await expect(
+      loginWithEmail("test@example.com", "password123"),
+    ).rejects.toThrow("Sign-in failed. Please try again.");
   });
 });
