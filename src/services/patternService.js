@@ -1,5 +1,19 @@
 import { apiFetch } from "./apiClient";
 
+export async function getPatterns() {
+  const response = await apiFetch("/patterns");
+
+  if (!response.ok) {
+    const error = await response.json();
+    const detail = error.detail;
+    throw new Error(
+      typeof detail === "string" ? detail : "Failed to load patterns",
+    );
+  }
+
+  return response.json();
+}
+
 export async function getPattern(patternId) {
   const response = await apiFetch(`/patterns/${patternId}`);
 

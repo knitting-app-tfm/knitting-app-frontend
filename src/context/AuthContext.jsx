@@ -1,10 +1,11 @@
-import { useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { auth } from "../services/firebase";
-import { AuthContext } from "./authContext";
+
+const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(undefined); // undefined while Firebase loads
+  const [user, setUser] = useState(undefined); // undefined while Firebase resolves
 
   useEffect(() => {
     return onAuthStateChanged(auth, setUser);
@@ -18,3 +19,6 @@ export function AuthProvider({ children }) {
     </AuthContext.Provider>
   );
 }
+
+// eslint-disable-next-line react-refresh/only-export-components
+export const useAuth = () => useContext(AuthContext);

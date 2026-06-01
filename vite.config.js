@@ -1,6 +1,13 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 
+// Browser navigations (page reloads, link clicks) include text/html in Accept.
+// API fetch() calls do not. This bypass returns index.html for navigations so
+// the SPA handles routing, while API requests are still proxied to the backend.
+function spaBypass(req) {
+  if (req.headers.accept?.includes("text/html")) return "/index.html";
+}
+
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
@@ -8,7 +15,11 @@ export default defineConfig({
     host: "0.0.0.0",
     port: 5173,
     proxy: {
-      "/patterns": { target: "http://localhost:8000", changeOrigin: true },
+      "/patterns": {
+        target: "http://localhost:8000",
+        changeOrigin: true,
+        bypass: spaBypass,
+      },
       "/abbreviations": { target: "http://localhost:8000", changeOrigin: true },
       "/auth": { target: "http://localhost:8000", changeOrigin: true },
       "/media": { target: "http://localhost:8000", changeOrigin: true },

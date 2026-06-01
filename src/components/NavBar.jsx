@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
-import { useAuth } from "../context/useAuth";
+import { useAuth } from "../context/AuthContext.jsx";
 import "./NavBar.css";
 
 function UserMenu({ user, logout }) {
@@ -112,6 +112,13 @@ function NavBar() {
                 Dictionary
               </NavLink>
             </li>
+            {user && (
+              <li className="nav-item">
+                <NavLink className="nav-link" to="/patterns">
+                  My patterns
+                </NavLink>
+              </li>
+            )}
           </ul>
 
           <ul className="navbar-nav ms-auto align-items-center gap-2">

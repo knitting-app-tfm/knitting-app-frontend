@@ -6,6 +6,7 @@ import ImportPdfPage from "../pages/import/ImportPdfPage";
 import ImportTextPage from "../pages/import/ImportTextPage";
 import RegisterPage from "../pages/auth/RegisterPage";
 import LoginPage from "../pages/auth/LoginPage";
+import PatternListPage from "../pages/pattern/PatternListPage";
 import ConfirmPatternPage from "../pages/confirm/ConfirmPatternPage";
 import DictionaryPage from "../pages/dictionary/DictionaryPage";
 import PatternDetailPage from "../pages/pattern/PatternDetailPage";
@@ -18,6 +19,7 @@ const router = createBrowserRouter([
       { path: "/", element: <App /> },
       { path: "/register", element: <RegisterPage /> },
       { path: "/login", element: <LoginPage /> },
+      { path: "/patterns", element: <PatternListPage /> },
       { path: "/import", element: <ImportPage /> },
       { path: "/import/pdf", element: <ImportPdfPage /> },
       { path: "/import/text", element: <ImportTextPage /> },
