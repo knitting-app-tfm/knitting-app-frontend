@@ -1,4 +1,8 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
+
+vi.mock("firebase/auth", () => ({
+  getAuth: vi.fn(() => ({ currentUser: null })),
+}));
 import {
   importPatternFromPdf,
   importPatternFromText,
@@ -135,7 +139,10 @@ describe("getPattern", () => {
 
     const result = await getPattern("42");
 
-    expect(fetchMock).toHaveBeenCalledWith(`${API_URL}/patterns/42`);
+    expect(fetchMock).toHaveBeenCalledWith(
+      `${API_URL}/patterns/42`,
+      expect.any(Object),
+    );
     expect(result).toEqual(pattern);
   });
 
