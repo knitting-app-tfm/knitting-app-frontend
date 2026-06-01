@@ -2,6 +2,7 @@ import { describe, it, expect, vi, afterEach } from "vitest";
 import {
   getAbbreviations,
   getAbbreviationById,
+  getAbbreviationByCode,
 } from "../../src/services/abbreviationService";
 
 const API_URL = "http://localhost:8000";
@@ -115,6 +116,41 @@ describe("getAbbreviationById", () => {
     );
 
     await expect(getAbbreviationById("99")).rejects.toThrow(
+      "Error al obtener la abreviatura",
+    );
+  });
+});
+
+describe("getAbbreviationByCode", () => {
+  it("GETs /abbreviations/code/{code} and returns the abbreviation", async () => {
+    const abbr = { id: "5", abbreviation: "sts", full_name: "stitches" };
+    const fetchMock = mockFetch(abbr);
+    vi.stubGlobal("fetch", fetchMock);
+
+    const result = await getAbbreviationByCode("sts");
+
+    expect(fetchMock).toHaveBeenCalledWith(`${API_URL}/abbreviations/code/sts`);
+    expect(result).toEqual(abbr);
+  });
+
+  it("throws with detail message when the response is not ok", async () => {
+    vi.stubGlobal(
+      "fetch",
+      mockFetch({ detail: "Abbreviation not found" }, false),
+    );
+
+    await expect(getAbbreviationByCode("XX")).rejects.toThrow(
+      "Abbreviation not found",
+    );
+  });
+
+  it("throws a generic error when detail is not a string", async () => {
+    vi.stubGlobal(
+      "fetch",
+      mockFetch({ detail: [{ msg: "not found" }] }, false),
+    );
+
+    await expect(getAbbreviationByCode("XX")).rejects.toThrow(
       "Error al obtener la abreviatura",
     );
   });
