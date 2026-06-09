@@ -1,0 +1,193 @@
+.pc {
+  background: var(--kn-surface);
+  border: 1.5px solid var(--kn-border);
+  border-radius: 20px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition:
+    box-shadow var(--kn-transition-base),
+    transform var(--kn-transition-base);
+}
+
+.pc:hover {
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.09);
+  transform: translateY(-2px);
+}
+
+/* ── Cover image ── */
+.pc__cover {
+  height: 170px;
+  background: var(--kn-surface-alt);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.pc__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.pc__placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--kn-border-strong);
+}
+
+/* ── Body ── */
+.pc__body {
+  padding: var(--kn-spacing-4) var(--kn-spacing-5) var(--kn-spacing-3);
+  flex: 1;
+}
+
+.pc__title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--kn-text-primary);
+  letter-spacing: -0.01em;
+  margin: 0 0 var(--kn-spacing-3);
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.pc__meta {
+  display: flex;
+  align-items: center;
+  gap: var(--kn-spacing-3);
+  flex-wrap: wrap;
+}
+
+/* ── Craft badge — filled colored pill (category) ── */
+.pc__craft {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.65rem;
+  border-radius: var(--kn-radius-full);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  border: 1px solid transparent;
+}
+
+.pc__craft--knitting {
+  background: var(--kn-secondary-bg);
+  color: var(--kn-secondary-dark);
+  border-color: var(--kn-secondary-border);
+}
+
+.pc__craft--crochet {
+  background: var(--kn-primary-bg);
+  color: var(--kn-primary);
+  border-color: var(--kn-primary-border);
+}
+
+/* ── Status indicator — dot + uppercase text (workflow step) ── */
+.pc__status {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--kn-text-muted);
+}
+
+.pc__status::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: currentColor;
+}
+
+.pc__status--imported {
+  color: var(--kn-text-muted);
+}
+
+.pc__status--confirmed {
+  color: #0c7a6b;
+}
+
+.pc__status--tokenized {
+  color: var(--kn-accent-dark);
+}
+
+/* ── Actions ── */
+.pc__actions {
+  display: flex;
+  gap: var(--kn-spacing-2);
+  padding: var(--kn-spacing-3) var(--kn-spacing-5) var(--kn-spacing-5);
+  flex-wrap: wrap;
+}
+
+.pc__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 0.35rem 0.75rem;
+  border-radius: var(--kn-radius-full);
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  transition:
+    background var(--kn-transition-fast),
+    color var(--kn-transition-fast);
+  white-space: nowrap;
+  font-family: inherit;
+}
+
+.pc__btn--edit {
+  background: var(--kn-primary);
+  color: #fff;
+}
+
+.pc__btn--edit:hover {
+  background: var(--kn-primary-light);
+  color: #fff;
+}
+
+.pc__btn--translate {
+  background: var(--kn-secondary-dark);
+  color: #fff;
+}
+
+.pc__btn--translate:hover:not(:disabled) {
+  background: var(--kn-secondary);
+  color: var(--kn-text-primary);
+}
+
+.pc__btn--translate:disabled {
+  opacity: 0.38;
+  cursor: not-allowed;
+}
+
+.pc__btn--original {
+  background: var(--kn-surface-alt);
+  color: var(--kn-text-secondary);
+  border: 1px solid var(--kn-border);
+}
+
+.pc__btn--original:hover {
+  background: var(--kn-border);
+  color: var(--kn-text-primary);
+}
+
+/* ── Error ── */
+.pc__error {
+  margin: 0;
+  padding: var(--kn-spacing-2) var(--kn-spacing-5) var(--kn-spacing-4);
+  font-size: var(--kn-text-xs);
+  color: #a02020;
+}

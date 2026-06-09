@@ -34,7 +34,7 @@ function RegisterPage() {
 
         <p className="register-card__footer">
           Already have an account?{" "}
-          <Link to="/" className="register-card__link">
+          <Link to="/login" className="register-card__link">
             Sign in
           </Link>
         </p>

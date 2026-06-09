@@ -1,4 +1,8 @@
-import { createUserWithEmailAndPassword } from "firebase/auth";
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  updateProfile,
+} from "firebase/auth";
 import { auth } from "./firebase";
 
 const API_URL = import.meta.env.VITE_API_URL;
@@ -19,6 +23,20 @@ function getFirebaseErrorMessage(error) {
   );
 }
 
+const LOGIN_FIREBASE_ERROR_MESSAGES = {
+  "auth/invalid-credential": "Incorrect email or password.",
+  "auth/too-many-requests": "Too many attempts. Please try again later.",
+  "auth/network-request-failed": "Network error. Please check your connection.",
+  "auth/operation-not-allowed": "Email/password sign-in is not enabled.",
+};
+
+function getLoginFirebaseErrorMessage(error) {
+  return (
+    LOGIN_FIREBASE_ERROR_MESSAGES[error.code] ??
+    "Sign-in failed. Please try again."
+  );
+}
+
 export async function registerWithEmail(email, password, username) {
   let credential;
   try {
@@ -26,6 +44,7 @@ export async function registerWithEmail(email, password, username) {
   } catch (error) {
     throw new Error(getFirebaseErrorMessage(error), { cause: error });
   }
+  await updateProfile(credential.user, { displayName: username });
   const token = await credential.user.getIdToken();
 
   const response = await fetch(`${API_URL}/auth/register`, {
@@ -43,4 +62,12 @@ export async function registerWithEmail(email, password, username) {
   }
 
   return response.json();
+}
+
+export async function loginWithEmail(email, password) {
+  try {
+    await signInWithEmailAndPassword(auth, email, password);
+  } catch (error) {
+    throw new Error(getLoginFirebaseErrorMessage(error), { cause: error });
+  }
 }
