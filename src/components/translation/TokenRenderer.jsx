@@ -31,7 +31,11 @@ function TokenRenderer({ token, onAbbreviationClick, bold, italic, fontSize }) {
     const text = token.values
       .map((v, i) => (i === 0 ? String(v) : `(${v})`))
       .join(" ");
-    return <span style={style}>{text}</span>;
+    return (
+      <span className="tr-size-group" style={style}>
+        {text}
+      </span>
+    );
   }
 
   if (token.type === "abbreviation") {

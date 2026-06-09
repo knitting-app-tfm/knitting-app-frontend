@@ -29,3 +29,12 @@
   background: var(--kn-accent-dark);
   color: #fff;
 }
+
+.tr-size-group {
+  background: var(--kn-secondary-bg);
+  color: var(--kn-secondary-dark);
+  border-radius: var(--kn-radius-sm);
+  padding: 0.05em 0.35em;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
