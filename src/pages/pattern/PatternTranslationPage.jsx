@@ -1,6 +1,5 @@
 import { useState, useRef, useEffect } from "react";
 import { useParams, Link, useLocation } from "react-router-dom";
-import { getPatternOriginalText } from "../../services/patternService";
 import { getAbbreviationByCode } from "../../services/abbreviationService";
 import TokenRenderer from "../../components/translation/TokenRenderer";
 import AbbreviationDetail from "../../components/dictionary/AbbreviationDetail";
@@ -11,10 +10,6 @@ function PatternTranslationPage() {
   const { id } = useParams();
   const { state } = useLocation();
   const lines = state?.tokens ?? [];
-
-  const [originalText, setOriginalText] = useState(null);
-  const [originalLoading, setOriginalLoading] = useState(false);
-  const [originalError, setOriginalError] = useState(null);
 
   const [selectedAbbr, setSelectedAbbr] = useState(null);
   const [abbrLoading, setAbbrLoading] = useState(false);
@@ -62,23 +57,6 @@ function PatternTranslationPage() {
     setAbbrLoading(false);
   }
 
-  async function handleViewOriginal() {
-    if (originalText !== null) {
-      setOriginalText(null);
-      return;
-    }
-    setOriginalLoading(true);
-    setOriginalError(null);
-    try {
-      const text = await getPatternOriginalText(id);
-      setOriginalText(text);
-    } catch (err) {
-      setOriginalError(err.message);
-    } finally {
-      setOriginalLoading(false);
-    }
-  }
-
   return (
     <div className="pd-page">
       <nav className="kn-breadcrumb" aria-label="breadcrumb">
@@ -96,26 +74,6 @@ function PatternTranslationPage() {
       <div className="pt-card">
         <div className="pt-card__head">
           <span className="pt-card__label">Translated pattern</span>
-          <button
-            className="pt-original-btn"
-            onClick={handleViewOriginal}
-            disabled={originalLoading}
-          >
-            {originalLoading ? (
-              <>
-                <span
-                  className="spinner-border spinner-border-sm"
-                  role="status"
-                  aria-hidden="true"
-                />
-                Loading…
-              </>
-            ) : originalText !== null ? (
-              "Hide original"
-            ) : (
-              "View original pattern"
-            )}
-          </button>
         </div>
 
         <div className="pt-pattern">
@@ -143,21 +101,6 @@ function PatternTranslationPage() {
           )}
         </div>
       </div>
-
-      {originalError && (
-        <div className="alert alert-danger" role="alert">
-          {originalError}
-        </div>
-      )}
-
-      {originalText !== null && (
-        <div className="pt-card">
-          <div className="pt-card__head">
-            <span className="pt-card__label">Original pattern</span>
-          </div>
-          <pre className="pt-original-text">{originalText}</pre>
-        </div>
-      )}
 
       <div
         ref={detailRef}

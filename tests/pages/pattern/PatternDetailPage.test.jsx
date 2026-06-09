@@ -261,4 +261,18 @@ describe("PatternDetailPage — rendering", () => {
     expect(await screen.findByText(/crochet/i)).toBeInTheDocument();
     expect(screen.getByText("Hook size")).toBeInTheDocument();
   });
+
+  it("hides the hero section when the cover image fails to load", async () => {
+    patternService.getPattern.mockResolvedValue({
+      ...PATTERN,
+      cover_image_path: "/media/cover.jpg",
+    });
+
+    renderPage();
+
+    const img = await screen.findByRole("img", { name: "Test Pattern" });
+    fireEvent.error(img);
+
+    expect(img.closest(".pd-hero").style.display).toBe("none");
+  });
 });

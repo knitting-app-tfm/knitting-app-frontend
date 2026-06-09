@@ -29,6 +29,22 @@ describe("TokenRenderer", () => {
     expect(screen.getByText("147 (159) (174)")).toBeInTheDocument();
   });
 
+  it("applies the tr-size-group highlight class to a size_group token", () => {
+    render(
+      <TokenRenderer
+        token={{
+          type: "size_group",
+          values: [25, 25, 27, 27, 29, 31],
+          unit: "stitches",
+          scalable: true,
+        }}
+      />,
+    );
+    expect(screen.getByText("25 (25) (27) (27) (29) (31)")).toHaveClass(
+      "tr-size-group",
+    );
+  });
+
   it("renders a single-value size_group without parentheses", () => {
     render(
       <TokenRenderer
