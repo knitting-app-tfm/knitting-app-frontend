@@ -126,6 +126,32 @@ describe("PatternCard", () => {
     expect(img.src).toBe("http://example.com/cover.jpg");
   });
 
+  it("resolves a slash-prefixed relative cover image path against the API base URL", () => {
+    renderCard({ ...BASE_PATTERN, cover_image_path: "/media/cover.jpg" });
+
+    const img = screen.getByRole("img", { name: "My Pattern" });
+    expect(img.src).toBe("http://localhost:8000/media/cover.jpg");
+  });
+
+  it("prepends a slash when the relative cover image path has no leading slash", () => {
+    renderCard({ ...BASE_PATTERN, cover_image_path: "media/cover.jpg" });
+
+    const img = screen.getByRole("img", { name: "My Pattern" });
+    expect(img.src).toBe("http://localhost:8000/media/cover.jpg");
+  });
+
+  it("hides the broken img and reveals the placeholder when the image fails to load", () => {
+    renderCard({
+      ...BASE_PATTERN,
+      cover_image_path: "http://example.com/cover.jpg",
+    });
+
+    const img = screen.getByRole("img", { name: "My Pattern" });
+    fireEvent.error(img);
+
+    expect(img.style.display).toBe("none");
+  });
+
   it("omits craft badge when craft is null", () => {
     renderCard({ ...BASE_PATTERN, craft: null });
 
@@ -137,5 +163,17 @@ describe("PatternCard", () => {
     renderCard({ ...BASE_PATTERN, craft: "CROCHET" });
 
     expect(screen.getByText("Crochet")).toBeInTheDocument();
+  });
+
+  it("falls back to the raw craft value when it is not in the labels map", () => {
+    renderCard({ ...BASE_PATTERN, craft: "WEAVING" });
+
+    expect(screen.getByText("WEAVING")).toBeInTheDocument();
+  });
+
+  it("falls back to the raw status value when it is not in the labels map", () => {
+    renderCard({ ...BASE_PATTERN, status: "PENDING" });
+
+    expect(screen.getByText("PENDING")).toBeInTheDocument();
   });
 });

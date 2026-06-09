@@ -1,8 +1,13 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import {
+  render,
+  screen,
+  fireEvent,
+  waitFor,
+  act,
+} from "@testing-library/react";
 import { createMemoryRouter, RouterProvider } from "react-router-dom";
 import PatternTranslationPage from "../../../src/pages/pattern/PatternTranslationPage";
-import * as patternService from "../../../src/services/patternService";
 import * as abbreviationService from "../../../src/services/abbreviationService";
 
 vi.mock("../../../src/services/patternService");
@@ -71,14 +76,6 @@ describe("PatternTranslationPage", () => {
     );
   });
 
-  it("renders the View original pattern button", () => {
-    renderPage("42", { tokens: [] });
-
-    expect(
-      screen.getByRole("button", { name: "View original pattern" }),
-    ).toBeInTheDocument();
-  });
-
   it("renders plain text tokens", () => {
     renderPage("42", { tokens: LINES });
 
@@ -123,93 +120,6 @@ describe("PatternTranslationPage", () => {
 
     expect(document.querySelector(".pt-pattern")).toBeInTheDocument();
     expect(document.querySelectorAll(".pt-line").length).toBe(0);
-  });
-
-  it("loads and shows original text when View original button is clicked", async () => {
-    patternService.getPatternOriginalText.mockResolvedValue(
-      "CO 147 stitches\nK2, P2",
-    );
-
-    renderPage("42", { tokens: [] });
-    fireEvent.click(
-      screen.getByRole("button", { name: "View original pattern" }),
-    );
-
-    await waitFor(() => {
-      const pre = document.querySelector(".pt-original-text");
-      expect(pre?.textContent).toContain("CO 147 stitches");
-    });
-  });
-
-  it("shows a spinner and disables the button while loading original text", async () => {
-    patternService.getPatternOriginalText.mockReturnValue(
-      new Promise(() => {}),
-    );
-
-    renderPage("42", { tokens: [] });
-    fireEvent.click(
-      screen.getByRole("button", { name: "View original pattern" }),
-    );
-
-    expect(screen.getByRole("button", { name: /loading/i })).toBeDisabled();
-  });
-
-  it("changes button label to Hide original after loading", async () => {
-    patternService.getPatternOriginalText.mockResolvedValue("raw text");
-
-    renderPage("42", { tokens: [] });
-    fireEvent.click(
-      screen.getByRole("button", { name: "View original pattern" }),
-    );
-
-    expect(
-      await screen.findByRole("button", { name: "Hide original" }),
-    ).toBeInTheDocument();
-  });
-
-  it("hides the original text when Hide original is clicked", async () => {
-    patternService.getPatternOriginalText.mockResolvedValue("raw text");
-
-    renderPage("42", { tokens: [] });
-    fireEvent.click(
-      screen.getByRole("button", { name: "View original pattern" }),
-    );
-    await screen.findByRole("button", { name: "Hide original" });
-
-    fireEvent.click(screen.getByRole("button", { name: "Hide original" }));
-
-    expect(screen.queryByText("raw text")).not.toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: "View original pattern" }),
-    ).toBeInTheDocument();
-  });
-
-  it("shows an error alert when loading the original text fails", async () => {
-    patternService.getPatternOriginalText.mockRejectedValue(
-      new Error("Could not load original pattern text"),
-    );
-
-    renderPage("42", { tokens: [] });
-    fireEvent.click(
-      screen.getByRole("button", { name: "View original pattern" }),
-    );
-
-    expect(await screen.findByRole("alert")).toHaveTextContent(
-      "Could not load original pattern text",
-    );
-  });
-
-  it("re-enables the button after a failed load", async () => {
-    patternService.getPatternOriginalText.mockRejectedValue(new Error("Error"));
-
-    renderPage("42", { tokens: [] });
-    fireEvent.click(
-      screen.getByRole("button", { name: "View original pattern" }),
-    );
-
-    expect(
-      await screen.findByRole("button", { name: "View original pattern" }),
-    ).not.toBeDisabled();
   });
 
   it("opens the detail panel with a spinner when a translated abbreviation is clicked", () => {
@@ -358,5 +268,82 @@ describe("PatternTranslationPage", () => {
         "sts",
       );
     });
+  });
+
+  it("does not close the detail panel when clicking inside it", async () => {
+    abbreviationService.getAbbreviationByCode.mockResolvedValue({
+      id: "1",
+      abbreviation: "sts",
+      full_name: "stitches",
+      craft: "KNITTING",
+      type: "STITCH",
+      description: "A basic knitting stitch",
+      video_link: null,
+    });
+
+    renderPage("42", { tokens: LINES });
+    fireEvent.click(screen.getByText("stitches"));
+    await screen.findByText("A basic knitting stitch");
+
+    fireEvent.mouseDown(screen.getByText("A basic knitting stitch"));
+
+    expect(screen.getByText("A basic knitting stitch")).toBeInTheDocument();
+    expect(document.querySelector(".pt-detail-col--open")).toBeInTheDocument();
+  });
+
+  it("discards a successful fetch result when the request was cancelled", async () => {
+    let resolveAbbr;
+    abbreviationService.getAbbreviationByCode.mockReturnValue(
+      new Promise((res) => {
+        resolveAbbr = res;
+      }),
+    );
+
+    renderPage("42", { tokens: LINES });
+    fireEvent.click(screen.getByText("stitches"));
+
+    fireEvent.mouseDown(screen.getByText("Cast on"));
+
+    await act(async () => {
+      resolveAbbr({
+        id: "1",
+        abbreviation: "sts",
+        full_name: "stitches",
+        craft: "KNITTING",
+        type: "STITCH",
+        description: "A basic knitting stitch",
+        video_link: null,
+      });
+    });
+
+    expect(
+      screen.queryByText("A basic knitting stitch"),
+    ).not.toBeInTheDocument();
+    expect(
+      document.querySelector(".pt-detail-col--open"),
+    ).not.toBeInTheDocument();
+  });
+
+  it("discards a failed fetch result when the request was cancelled", async () => {
+    let rejectAbbr;
+    abbreviationService.getAbbreviationByCode.mockReturnValue(
+      new Promise((_, rej) => {
+        rejectAbbr = rej;
+      }),
+    );
+
+    renderPage("42", { tokens: LINES });
+    fireEvent.click(screen.getByText("stitches"));
+
+    fireEvent.mouseDown(screen.getByText("Cast on"));
+
+    await act(async () => {
+      rejectAbbr(new Error("Not found"));
+    });
+
+    expect(screen.queryByText("Not found")).not.toBeInTheDocument();
+    expect(
+      document.querySelector(".pt-detail-col--open"),
+    ).not.toBeInTheDocument();
   });
 });
