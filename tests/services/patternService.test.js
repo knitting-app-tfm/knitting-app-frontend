@@ -1,9 +1,15 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
+
+vi.mock("firebase/auth", () => ({
+  getAuth: vi.fn(() => ({ currentUser: null })),
+}));
 import {
   importPatternFromPdf,
   importPatternFromText,
   getPattern,
   confirmPattern,
+  translatePattern,
+  getPatterns,
 } from "../../src/services/patternService";
 
 const API_URL = "http://localhost:8000";
@@ -17,6 +23,32 @@ function mockFetch(body, ok = true) {
 
 afterEach(() => {
   vi.unstubAllGlobals();
+});
+
+describe("getPatterns", () => {
+  it("returns the parsed pattern list on success", async () => {
+    const patterns = [{ id: "1", title: "Scarf" }];
+    vi.stubGlobal("fetch", mockFetch(patterns));
+
+    const result = await getPatterns();
+
+    expect(result).toEqual(patterns);
+  });
+
+  it("throws with the detail string when the response is not ok", async () => {
+    vi.stubGlobal(
+      "fetch",
+      mockFetch({ detail: "Authentication required" }, false),
+    );
+
+    await expect(getPatterns()).rejects.toThrow("Authentication required");
+  });
+
+  it("throws a generic message when detail is not a string", async () => {
+    vi.stubGlobal("fetch", mockFetch({ detail: [{ msg: "error" }] }, false));
+
+    await expect(getPatterns()).rejects.toThrow("Failed to load patterns");
+  });
 });
 
 describe("importPatternFromPdf", () => {
@@ -133,7 +165,10 @@ describe("getPattern", () => {
 
     const result = await getPattern("42");
 
-    expect(fetchMock).toHaveBeenCalledWith(`${API_URL}/patterns/42`);
+    expect(fetchMock).toHaveBeenCalledWith(
+      `${API_URL}/patterns/42`,
+      expect.any(Object),
+    );
     expect(result).toEqual(pattern);
   });
 
@@ -188,6 +223,54 @@ describe("confirmPattern", () => {
 
     await expect(confirmPattern("42", new FormData())).rejects.toThrow(
       "Error al confirmar el patrón",
+    );
+  });
+});
+
+describe("translatePattern", () => {
+  it("POSTs to /patterns/{id}/translate with no body", async () => {
+    const fetchMock = mockFetch([{ line: 1, tokens: [] }]);
+    vi.stubGlobal("fetch", fetchMock);
+
+    await translatePattern("42");
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      `${API_URL}/patterns/42/translate`,
+      expect.objectContaining({ method: "POST" }),
+    );
+  });
+
+  it("returns the parsed token list on success", async () => {
+    const tokens = [{ line: 1, tokens: ["k2tog"] }];
+    vi.stubGlobal("fetch", mockFetch(tokens));
+
+    const result = await translatePattern("42");
+
+    expect(result).toEqual(tokens);
+  });
+
+  it("throws with the detail message when the response is not ok", async () => {
+    vi.stubGlobal(
+      "fetch",
+      mockFetch(
+        { detail: "Pattern must be confirmed before translating" },
+        false,
+      ),
+    );
+
+    await expect(translatePattern("42")).rejects.toThrow(
+      "Pattern must be confirmed before translating",
+    );
+  });
+
+  it("throws a generic error when detail is not a string", async () => {
+    vi.stubGlobal(
+      "fetch",
+      mockFetch({ detail: [{ msg: "invalid state" }] }, false),
+    );
+
+    await expect(translatePattern("42")).rejects.toThrow(
+      "Error al traducir el patrón",
     );
   });
 });

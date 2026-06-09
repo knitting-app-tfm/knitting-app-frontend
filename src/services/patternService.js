@@ -1,7 +1,21 @@
-const API_URL = import.meta.env.VITE_API_URL;
+import { apiFetch } from "./apiClient";
+
+export async function getPatterns() {
+  const response = await apiFetch("/patterns");
+
+  if (!response.ok) {
+    const error = await response.json();
+    const detail = error.detail;
+    throw new Error(
+      typeof detail === "string" ? detail : "Failed to load patterns",
+    );
+  }
+
+  return response.json();
+}
 
 export async function getPattern(patternId) {
-  const response = await fetch(`${API_URL}/patterns/${patternId}`);
+  const response = await apiFetch(`/patterns/${patternId}`);
 
   if (!response.ok) {
     const error = await response.json();
@@ -15,7 +29,7 @@ export async function getPattern(patternId) {
 }
 
 export async function confirmPattern(patternId, formData) {
-  const response = await fetch(`${API_URL}/patterns/${patternId}/confirm`, {
+  const response = await apiFetch(`/patterns/${patternId}/confirm`, {
     method: "PUT",
     body: formData,
   });
@@ -35,7 +49,7 @@ export async function importPatternFromPdf(file) {
   const formData = new FormData();
   formData.append("file", file);
 
-  const response = await fetch(`${API_URL}/patterns/import/pdf`, {
+  const response = await apiFetch(`/patterns/import/pdf`, {
     method: "POST",
     body: formData,
   });
@@ -51,8 +65,24 @@ export async function importPatternFromPdf(file) {
   return response.json();
 }
 
+export async function translatePattern(patternId) {
+  const response = await apiFetch(`/patterns/${patternId}/translate`, {
+    method: "POST",
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    const detail = error.detail;
+    throw new Error(
+      typeof detail === "string" ? detail : "Error al traducir el patrón",
+    );
+  }
+  // console.log(response.json());
+  return response.json();
+}
+
 export async function importPatternFromText(text) {
-  const response = await fetch(`${API_URL}/patterns/import/text`, {
+  const response = await apiFetch(`/patterns/import/text`, {
     method: "POST",
     headers: { "Content-Type": "text/plain" },
     body: text,

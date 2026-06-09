@@ -33,3 +33,17 @@ export async function getAbbreviationById(id) {
 
   return response.json();
 }
+
+export async function getAbbreviationByCode(code) {
+  const response = await fetch(`${API_URL}/abbreviations/code/${code}`);
+
+  if (!response.ok) {
+    const error = await response.json();
+    const detail = error.detail;
+    throw new Error(
+      typeof detail === "string" ? detail : "Error al obtener la abreviatura",
+    );
+  }
+
+  return response.json();
+}
