@@ -3,6 +3,11 @@ import { useRef } from "react";
 function CoverImageSection({ coverPreview, onCoverChange, coverImageError }) {
   const inputRef = useRef(null);
 
+  const safeSrc =
+    typeof coverPreview === "string" && coverPreview.startsWith("blob:")
+      ? coverPreview
+      : null;
+
   return (
     <div className="cp-photo-area">
       <input
@@ -21,9 +26,9 @@ function CoverImageSection({ coverPreview, onCoverChange, coverImageError }) {
         onKeyDown={(e) => e.key === "Enter" && inputRef.current?.click()}
         aria-label="Upload cover image"
       >
-        {coverPreview ? (
+        {safeSrc ? (
           <>
-            <img src={coverPreview} alt="Cover preview" />
+            <img src={safeSrc} alt="Cover preview" />
             <div className="cp-photo-preview__overlay">Change photo</div>
           </>
         ) : (
