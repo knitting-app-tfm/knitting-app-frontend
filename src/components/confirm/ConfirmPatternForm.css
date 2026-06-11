@@ -180,6 +180,35 @@
 }
 
 /* ── Sizes: tag pills ── */
+.cp-onesize-row {
+  display: flex;
+  align-items: center;
+  gap: var(--kn-spacing-2);
+  margin-bottom: var(--kn-spacing-4);
+}
+
+.cp-onesize-row input[type="checkbox"] {
+  accent-color: var(--kn-primary);
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.cp-onesize-row label {
+  font-size: var(--kn-text-sm);
+  font-weight: 600;
+  color: var(--kn-text-secondary);
+  cursor: pointer;
+  margin: 0;
+  user-select: none;
+}
+
+.cp-size-tag--onesize {
+  opacity: 0.65;
+  cursor: default;
+}
+
 .cp-size-tags {
   display: flex;
   flex-wrap: wrap;
