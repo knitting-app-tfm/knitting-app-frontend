@@ -1,8 +1,10 @@
 import { useState, useRef, useEffect } from "react";
 import { useParams, Link, useLocation } from "react-router-dom";
 import { getAbbreviationByCode } from "../../services/abbreviationService";
+import { getPattern } from "../../services/patternService";
 import TokenRenderer from "../../components/translation/TokenRenderer";
 import AbbreviationDetail from "../../components/dictionary/AbbreviationDetail";
+import AdaptPatternModal from "../../components/pattern/AdaptPatternModal";
 import "./PatternDetailPage.css";
 import "./PatternTranslationPage.css";
 
@@ -11,11 +13,20 @@ function PatternTranslationPage() {
   const { state } = useLocation();
   const lines = state?.tokens ?? [];
 
+  const [pattern, setPattern] = useState(null);
+  const [modalOpen, setModalOpen] = useState(false);
+
   const [selectedAbbr, setSelectedAbbr] = useState(null);
   const [abbrLoading, setAbbrLoading] = useState(false);
   const [abbrError, setAbbrError] = useState(null);
   const detailRef = useRef(null);
   const fetchCancelledRef = useRef(false);
+
+  useEffect(() => {
+    getPattern(id)
+      .then(setPattern)
+      .catch(() => {});
+  }, [id]);
 
   const panelOpen = abbrLoading || selectedAbbr !== null || abbrError !== null;
 
@@ -50,6 +61,13 @@ function PatternTranslationPage() {
     }
   }
 
+  function handleModalConfirm() {
+    setModalOpen(false);
+    getPattern(id)
+      .then(setPattern)
+      .catch(() => {});
+  }
+
   function handleCloseDetail() {
     fetchCancelledRef.current = true;
     setSelectedAbbr(null);
@@ -68,7 +86,30 @@ function PatternTranslationPage() {
       </nav>
 
       <div className="pd-header">
-        <h1 className="pd-header__title">Pattern Translation</h1>
+        <div className="pt-header-row">
+          <h1 className="pd-header__title">Pattern Translation</h1>
+          {pattern?.status === "TOKENIZED" && (
+            <button className="pt-adapt-btn" onClick={() => setModalOpen(true)}>
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <polyline points="15 3 21 3 21 9" />
+                <polyline points="9 21 3 21 3 15" />
+                <line x1="21" y1="3" x2="14" y2="10" />
+                <line x1="3" y1="21" x2="10" y2="14" />
+              </svg>
+              Adapt pattern
+            </button>
+          )}
+        </div>
       </div>
 
       <div className="pt-card">
@@ -101,6 +142,14 @@ function PatternTranslationPage() {
           )}
         </div>
       </div>
+
+      {modalOpen && pattern && (
+        <AdaptPatternModal
+          pattern={pattern}
+          onClose={() => setModalOpen(false)}
+          onConfirm={handleModalConfirm}
+        />
+      )}
 
       <div
         ref={detailRef}

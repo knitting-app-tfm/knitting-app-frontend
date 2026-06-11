@@ -1,3 +1,33 @@
+/* ── Header row: title + action button ── */
+.pt-header-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--kn-spacing-4);
+}
+
+.pt-adapt-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--kn-spacing-2);
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+  border: 1.5px solid rgba(255, 255, 255, 0.4);
+  font-weight: 700;
+  font-size: var(--kn-text-sm);
+  padding: 0.55rem 1.25rem;
+  border-radius: var(--kn-radius-full);
+  cursor: pointer;
+  transition: background var(--kn-transition-fast);
+  backdrop-filter: blur(4px);
+  font-family: var(--kn-font-body);
+  flex-shrink: 0;
+}
+
+.pt-adapt-btn:hover {
+  background: rgba(255, 255, 255, 0.26);
+}
+
 /* ── Card (mirrors pd-section) ── */
 .pt-card {
   background: var(--kn-surface);

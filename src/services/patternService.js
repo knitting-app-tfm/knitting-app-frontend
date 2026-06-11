@@ -81,6 +81,42 @@ export async function translatePattern(patternId) {
   return response.json();
 }
 
+export async function getScaling(patternId) {
+  const response = await apiFetch(`/patterns/${patternId}/scaling`);
+
+  if (response.status === 404) return null;
+
+  if (!response.ok) {
+    const error = await response.json();
+    const detail = error.detail;
+    throw new Error(
+      typeof detail === "string" ? detail : "Failed to load scaling",
+    );
+  }
+
+  return response.json();
+}
+
+export async function putScaling(patternId, sizeLabel, sizePosition) {
+  const response = await apiFetch(`/patterns/${patternId}/scaling`, {
+    method: "PUT",
+    body: JSON.stringify({
+      size_label: sizeLabel,
+      size_position: sizePosition,
+    }),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    const detail = error.detail;
+    throw new Error(
+      typeof detail === "string" ? detail : "Failed to save scaling",
+    );
+  }
+
+  return response.json();
+}
+
 export async function importPatternFromText(text) {
   const response = await apiFetch(`/patterns/import/text`, {
     method: "POST",
