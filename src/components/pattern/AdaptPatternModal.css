@@ -243,3 +243,153 @@
   opacity: 0.55;
   cursor: not-allowed;
 }
+
+/* ── Step done state ── */
+.am-step--done .am-step__num {
+  background: var(--kn-secondary-dark);
+  border-color: var(--kn-secondary-dark);
+  color: #fff;
+}
+
+.am-step--done .am-step__label {
+  color: var(--kn-text-secondary);
+}
+
+/* ── Gauge source options ── */
+.am-gauge-options {
+  display: flex;
+  gap: var(--kn-spacing-2);
+  margin-bottom: var(--kn-spacing-5);
+}
+
+.am-gauge-option {
+  flex: 1;
+  padding: var(--kn-spacing-3) var(--kn-spacing-4);
+  border-radius: var(--kn-radius-lg);
+  border: 1.5px solid var(--kn-border);
+  background: var(--kn-bg);
+  color: var(--kn-text-secondary);
+  font-size: var(--kn-text-sm);
+  font-weight: 600;
+  cursor: pointer;
+  text-align: center;
+  transition:
+    border-color var(--kn-transition-fast),
+    background var(--kn-transition-fast),
+    color var(--kn-transition-fast);
+  font-family: var(--kn-font-body);
+  user-select: none;
+}
+
+.am-gauge-option:hover:not(.am-gauge-option--selected):not(
+    .am-gauge-option--disabled
+  ) {
+  border-color: var(--kn-primary-border);
+  color: var(--kn-primary);
+}
+
+.am-gauge-option--selected {
+  background: var(--kn-primary-bg);
+  border-color: var(--kn-primary);
+  color: var(--kn-primary);
+}
+
+.am-gauge-option--disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* ── Gauge fields ── */
+.am-gauge-fields {
+  display: flex;
+  flex-direction: column;
+  gap: var(--kn-spacing-4);
+}
+
+.am-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--kn-spacing-1);
+}
+
+.am-field__label {
+  font-size: var(--kn-text-sm);
+  font-weight: 600;
+  color: var(--kn-text-secondary);
+  margin: 0;
+}
+
+.am-required {
+  color: var(--kn-primary);
+}
+
+.am-field__hint {
+  font-size: var(--kn-text-xs);
+  color: var(--kn-text-muted);
+  margin: 0;
+}
+
+.am-field__warning {
+  font-size: var(--kn-text-xs);
+  color: #856404;
+  margin: 0;
+}
+
+/* ── Gauge size + unit row ── */
+.am-gauge-size-row {
+  display: flex;
+  gap: var(--kn-spacing-3);
+  align-items: flex-start;
+}
+
+.am-field--unit {
+  flex-shrink: 0;
+}
+
+/* ── Unit toggle buttons ── */
+.am-unit-toggle {
+  display: flex;
+}
+
+.am-unit-btn {
+  padding: 0.45rem 0.75rem;
+  border: 1.5px solid var(--kn-border);
+  background: var(--kn-bg);
+  color: var(--kn-text-secondary);
+  font-size: var(--kn-text-sm);
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    border-color var(--kn-transition-fast),
+    background var(--kn-transition-fast),
+    color var(--kn-transition-fast);
+  font-family: var(--kn-font-body);
+  line-height: 1.5;
+}
+
+.am-unit-btn:first-child {
+  border-radius: var(--kn-radius-sm) 0 0 var(--kn-radius-sm);
+}
+
+.am-unit-btn:last-child {
+  border-radius: 0 var(--kn-radius-sm) var(--kn-radius-sm) 0;
+  margin-left: -1.5px;
+}
+
+.am-unit-btn--selected {
+  background: var(--kn-primary-bg);
+  border-color: var(--kn-primary);
+  color: var(--kn-primary);
+  position: relative;
+  z-index: 1;
+}
+
+.am-unit-btn:hover:not(:disabled):not(.am-unit-btn--selected) {
+  border-color: var(--kn-primary-border);
+  color: var(--kn-primary);
+}
+
+.am-unit-btn:disabled {
+  opacity: 0.55;
+  cursor: default;
+}

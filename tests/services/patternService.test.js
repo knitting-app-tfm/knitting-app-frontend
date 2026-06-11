@@ -274,17 +274,17 @@ describe("getScaling", () => {
 
 describe("putScaling", () => {
   it("PUTs to /patterns/{id}/scaling with JSON body", async () => {
-    const result = { size_label: "S", size_position: 1 };
-    const fetchMock = mockFetch(result);
+    const payload = { size_label: "S", size_position: 1 };
+    const fetchMock = mockFetch(payload);
     vi.stubGlobal("fetch", fetchMock);
 
-    await putScaling("42", "S", 1);
+    await putScaling("42", payload);
 
     expect(fetchMock).toHaveBeenCalledWith(
       `${API_URL}/patterns/42/scaling`,
       expect.objectContaining({
         method: "PUT",
-        body: JSON.stringify({ size_label: "S", size_position: 1 }),
+        body: JSON.stringify(payload),
       }),
     );
   });

@@ -97,13 +97,10 @@ export async function getScaling(patternId) {
   return response.json();
 }
 
-export async function putScaling(patternId, sizeLabel, sizePosition) {
+export async function putScaling(patternId, scalingData) {
   const response = await apiFetch(`/patterns/${patternId}/scaling`, {
     method: "PUT",
-    body: JSON.stringify({
-      size_label: sizeLabel,
-      size_position: sizePosition,
-    }),
+    body: JSON.stringify(scalingData),
   });
 
   if (!response.ok) {
