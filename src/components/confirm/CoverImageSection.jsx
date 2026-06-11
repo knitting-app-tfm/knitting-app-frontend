@@ -1,14 +1,11 @@
-import { useRef, useEffect } from "react";
+import { useRef } from "react";
 
 function CoverImageSection({ coverPreview, onCoverChange, coverImageError }) {
   const inputRef = useRef(null);
-  const imgRef = useRef(null);
-
-  useEffect(() => {
-    const img = imgRef.current;
-    if (!img) return;
-    img.src = coverPreview ?? "";
-  }, [coverPreview]);
+  const safeCoverPreview =
+    typeof coverPreview === "string" && coverPreview.startsWith("blob:")
+      ? coverPreview
+      : "";
 
   return (
     <div className="cp-photo-area">
@@ -30,7 +27,7 @@ function CoverImageSection({ coverPreview, onCoverChange, coverImageError }) {
       >
         {coverPreview ? (
           <>
-            <img ref={imgRef} alt="Cover preview" />
+            <img src={safeCoverPreview} alt="Cover preview" />
             <div className="cp-photo-preview__overlay">Change photo</div>
           </>
         ) : (
