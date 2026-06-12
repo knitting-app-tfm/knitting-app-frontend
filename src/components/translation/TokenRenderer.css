@@ -38,3 +38,11 @@
   font-weight: 600;
   font-variant-numeric: tabular-nums;
 }
+
+.tr-token--scaled {
+  background: var(--kn-accent-bg);
+  color: var(--kn-accent-dark);
+  border-radius: var(--kn-radius-sm);
+  padding: 0.05em 0.2em;
+  font-weight: 600;
+}

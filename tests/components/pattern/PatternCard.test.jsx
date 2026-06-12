@@ -29,6 +29,7 @@ function renderCard(pattern = BASE_PATTERN) {
 describe("PatternCard", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    patternService.getScaling.mockResolvedValue(null);
   });
 
   it("renders title, craft badge, and status badge", () => {

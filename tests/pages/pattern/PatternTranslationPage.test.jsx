@@ -80,6 +80,7 @@ beforeEach(() => {
     status: "TOKENIZED",
     sizes: [],
   });
+  patternService.getScaling.mockResolvedValue(null);
 });
 
 afterEach(() => {
@@ -352,7 +353,7 @@ describe("PatternTranslationPage", () => {
     ).toBeInTheDocument();
   });
 
-  it("does not show the Adapt pattern button when pattern status is not TOKENIZED", async () => {
+  it("disables the Adapt pattern button when pattern status is not TOKENIZED", async () => {
     patternService.getPattern.mockResolvedValue({
       id: "42",
       title: "Test Pattern",
@@ -363,8 +364,8 @@ describe("PatternTranslationPage", () => {
     await renderPage("42", { tokens: [] });
 
     expect(
-      screen.queryByRole("button", { name: /Adapt pattern/i }),
-    ).not.toBeInTheDocument();
+      screen.getByRole("button", { name: /Adapt pattern/i }),
+    ).toBeDisabled();
   });
 
   it("opens the adapt modal when Adapt pattern is clicked", async () => {
@@ -384,8 +385,24 @@ describe("PatternTranslationPage", () => {
     expect(screen.queryByTestId("adapt-modal")).not.toBeInTheDocument();
   });
 
-  it("reloads the pattern and closes the modal when onConfirm is triggered", async () => {
-    await renderPage("42", { tokens: [] });
+  it("closes the modal and navigates to scaled page when onConfirm is triggered", async () => {
+    const router = createMemoryRouter(
+      [
+        {
+          path: "/patterns/:id/translation",
+          element: <PatternTranslationPage />,
+        },
+        { path: "/patterns/:id/scaled", element: <div>Scaled page</div> },
+      ],
+      {
+        initialEntries: [
+          { pathname: "/patterns/42/translation", state: { tokens: [] } },
+        ],
+      },
+    );
+    await act(async () => {
+      render(<RouterProvider router={router} />);
+    });
 
     fireEvent.click(screen.getByRole("button", { name: /Adapt pattern/i }));
 
@@ -393,8 +410,7 @@ describe("PatternTranslationPage", () => {
       fireEvent.click(screen.getByRole("button", { name: "Confirm modal" }));
     });
 
-    expect(screen.queryByTestId("adapt-modal")).not.toBeInTheDocument();
-    expect(patternService.getPattern).toHaveBeenCalledTimes(2);
+    expect(await screen.findByText("Scaled page")).toBeInTheDocument();
   });
 
   it("discards a failed fetch result when the request was cancelled", async () => {

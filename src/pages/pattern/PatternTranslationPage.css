@@ -24,8 +24,13 @@
   flex-shrink: 0;
 }
 
-.pt-adapt-btn:hover {
+.pt-adapt-btn:hover:not(:disabled) {
   background: rgba(255, 255, 255, 0.26);
+}
+
+.pt-adapt-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
 }
 
 /* ── Card (mirrors pd-section) ── */
@@ -108,5 +113,65 @@
   display: flex;
   justify-content: center;
   padding: var(--kn-spacing-8);
+  color: var(--kn-text-secondary);
+}
+
+/* ── View toggles (Translated / Scaled) ── */
+.pt-toggles {
+  display: flex;
+}
+
+.pt-toggle-btn {
+  padding: 0.35rem 1rem;
+  border: 1.5px solid var(--kn-border);
+  background: var(--kn-bg);
+  color: var(--kn-text-secondary);
+  font-size: var(--kn-text-sm);
+  font-weight: 600;
+  cursor: pointer;
+  font-family: var(--kn-font-body);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  transition:
+    border-color var(--kn-transition-fast),
+    background var(--kn-transition-fast),
+    color var(--kn-transition-fast);
+}
+
+.pt-toggle-btn:first-child {
+  border-radius: var(--kn-radius-sm) 0 0 var(--kn-radius-sm);
+}
+
+.pt-toggle-btn:last-child {
+  border-radius: 0 var(--kn-radius-sm) var(--kn-radius-sm) 0;
+  margin-left: -1.5px;
+}
+
+.pt-toggle-btn:hover:not(:disabled):not(.pt-toggle-btn--active):not(
+    .pt-toggle-btn--disabled
+  ) {
+  border-color: var(--kn-primary-border);
+  color: var(--kn-primary);
+}
+
+.pt-toggle-btn--active {
+  background: var(--kn-primary-bg);
+  border-color: var(--kn-primary);
+  color: var(--kn-primary);
+  cursor: default;
+  position: relative;
+  z-index: 1;
+}
+
+.pt-toggle-btn--disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* ── Size label ── */
+.pt-size-label {
+  font-size: var(--kn-text-sm);
+  font-weight: 600;
   color: var(--kn-text-secondary);
 }

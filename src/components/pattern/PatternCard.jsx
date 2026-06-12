@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { translatePattern } from "../../services/patternService";
+import { translatePattern, getScaling } from "../../services/patternService";
 import "./PatternCard.css";
 
 const BASE_URL = import.meta.env.VITE_API_URL ?? "";
@@ -38,8 +38,16 @@ function PatternCard({ pattern }) {
   const navigate = useNavigate();
   const [translating, setTranslating] = useState(false);
   const [translateError, setTranslateError] = useState(null);
+  const [scaling, setScaling] = useState(null);
 
   const { id, title, status, craft, cover_image_path } = pattern;
+
+  useEffect(() => {
+    if (status !== "TOKENIZED") return;
+    getScaling(id)
+      .then(setScaling)
+      .catch(() => {});
+  }, [id, status]);
 
   const coverUrl = cover_image_path
     ? cover_image_path.startsWith("http")
@@ -121,45 +129,68 @@ function PatternCard({ pattern }) {
           Edit
         </Link>
 
-        <button
-          className="pc__btn pc__btn--translate"
-          onClick={handleTranslate}
-          disabled={!canTranslate || translating}
-          title={!canTranslate ? "Confirm the pattern first" : undefined}
-        >
-          {translating ? (
-            <>
-              <span
-                className="spinner-border spinner-border-sm"
-                role="status"
-                aria-hidden="true"
-              />
-              Translating…
-            </>
-          ) : (
-            <>
-              <svg
-                width="13"
-                height="13"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                aria-hidden="true"
-              >
-                <path d="M5 8l6 6" />
-                <path d="M4 14l6-6 2-3" />
-                <path d="M2 5h12" />
-                <path d="M7 2h1" />
-                <path d="M22 22l-5-10-5 10" />
-                <path d="M14 18h6" />
-              </svg>
-              View translated
-            </>
-          )}
-        </button>
+        {status === "TOKENIZED" && scaling ? (
+          <Link
+            to={`/patterns/${id}/scaled`}
+            className="pc__btn pc__btn--translate"
+          >
+            <svg
+              width="13"
+              height="13"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <polyline points="22 7 13.5 15.5 8.5 10.5 2 17" />
+              <polyline points="16 7 22 7 22 13" />
+            </svg>
+            View scaled
+          </Link>
+        ) : (
+          <button
+            className="pc__btn pc__btn--translate"
+            onClick={handleTranslate}
+            disabled={!canTranslate || translating}
+            title={!canTranslate ? "Confirm the pattern first" : undefined}
+          >
+            {translating ? (
+              <>
+                <span
+                  className="spinner-border spinner-border-sm"
+                  role="status"
+                  aria-hidden="true"
+                />
+                Translating…
+              </>
+            ) : (
+              <>
+                <svg
+                  width="13"
+                  height="13"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M5 8l6 6" />
+                  <path d="M4 14l6-6 2-3" />
+                  <path d="M2 5h12" />
+                  <path d="M7 2h1" />
+                  <path d="M22 22l-5-10-5 10" />
+                  <path d="M14 18h6" />
+                </svg>
+                View translated
+              </>
+            )}
+          </button>
+        )}
       </div>
 
       {translateError && (

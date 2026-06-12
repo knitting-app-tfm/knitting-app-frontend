@@ -114,6 +114,20 @@ export async function putScaling(patternId, scalingData) {
   return response.json();
 }
 
+export async function getScaledPattern(patternId) {
+  const response = await apiFetch(`/patterns/${patternId}/scaled`);
+
+  if (!response.ok) {
+    const error = await response.json();
+    const detail = error.detail;
+    throw new Error(
+      typeof detail === "string" ? detail : "Failed to load scaled pattern",
+    );
+  }
+
+  return response.json();
+}
+
 export async function importPatternFromText(text) {
   const response = await apiFetch(`/patterns/import/text`, {
     method: "POST",
