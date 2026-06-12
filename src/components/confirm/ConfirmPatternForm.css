@@ -359,6 +359,47 @@
   margin-bottom: var(--kn-spacing-1);
 }
 
+/* ── Per-yarn grams-needed sub-section ── */
+.cp-yarn-grams {
+  margin-top: var(--kn-spacing-4);
+  padding-top: var(--kn-spacing-4);
+  border-top: 1px dashed var(--kn-border);
+  display: flex;
+  flex-direction: column;
+  gap: var(--kn-spacing-1);
+}
+
+.cp-yarn-grams__row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--kn-spacing-3);
+  align-items: flex-end;
+  margin-top: var(--kn-spacing-2);
+}
+
+.cp-yarn-grams__cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--kn-spacing-1);
+}
+
+.cp-yarn-grams__pill {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--kn-primary);
+  background: var(--kn-primary-bg);
+  border-radius: var(--kn-radius-full);
+  padding: 0.1rem 0.55rem;
+  white-space: nowrap;
+}
+
+.cp-yarn-grams__input {
+  width: 76px;
+  text-align: center;
+}
+
 /* ── Submit ── */
 .cp-submit-row {
   display: flex;

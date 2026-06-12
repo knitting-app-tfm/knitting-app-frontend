@@ -349,6 +349,48 @@ describe("getScaledPattern", () => {
   });
 });
 
+describe("confirmPattern grams_needed", () => {
+  it("test_confirm_grams_needed_length_mismatch: propagates 400 when array length does not match sizes", async () => {
+    vi.stubGlobal(
+      "fetch",
+      mockFetch({ detail: "grams_needed length must match sizes" }, false),
+    );
+
+    const fd = new FormData();
+    fd.append("sizes", JSON.stringify(["S"]));
+    fd.append("yarns", JSON.stringify([{ grams_needed: [100, 200] }]));
+
+    await expect(confirmPattern("42", fd)).rejects.toThrow(
+      "grams_needed length must match sizes",
+    );
+  });
+
+  it("test_confirm_grams_needed_one_size: accepts a single-element grams_needed array", async () => {
+    const confirmed = { id: "42", status: "CONFIRMED" };
+    vi.stubGlobal("fetch", mockFetch(confirmed));
+
+    const fd = new FormData();
+    fd.append("sizes", JSON.stringify([]));
+    fd.append("yarns", JSON.stringify([{ grams_needed: [100] }]));
+
+    const result = await confirmPattern("42", fd);
+
+    expect(result).toEqual(confirmed);
+  });
+
+  it("test_confirm_grams_needed_null: accepts null grams_needed", async () => {
+    const confirmed = { id: "42", status: "CONFIRMED" };
+    vi.stubGlobal("fetch", mockFetch(confirmed));
+
+    const fd = new FormData();
+    fd.append("yarns", JSON.stringify([{ grams_needed: null }]));
+
+    const result = await confirmPattern("42", fd);
+
+    expect(result).toEqual(confirmed);
+  });
+});
+
 describe("translatePattern", () => {
   it("POSTs to /patterns/{id}/translate with no body", async () => {
     const fetchMock = mockFetch([{ line: 1, tokens: [] }]);
