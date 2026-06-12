@@ -143,11 +143,11 @@ describe("PatternScaledPage", () => {
     ).toBeGreaterThan(0);
   });
 
-  it("does not wrap non-scaled tokens with tr-token--scaled class", async () => {
+  it("does not apply tr-token--scaled class to non-scaled tokens", async () => {
     await renderPage();
 
     const castOn = screen.getByText("Cast on");
-    expect(castOn.parentElement.className).toBeFalsy();
+    expect(castOn.className).toBeFalsy();
   });
 
   it("shows the rows_warning banner when rows_warning is true", async () => {

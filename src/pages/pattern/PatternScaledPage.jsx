@@ -200,20 +200,15 @@ function PatternScaledPage() {
                 ) : (
                   <div key={i} className="pt-line">
                     {lineTokens.tokens.map((token, j) => (
-                      <span
+                      <TokenRenderer
                         key={j}
-                        className={
-                          token.scaled ? "tr-token--scaled" : undefined
-                        }
-                      >
-                        <TokenRenderer
-                          token={token}
-                          onAbbreviationClick={handleAbbreviationClick}
-                          bold={lineTokens.bold}
-                          italic={lineTokens.italic}
-                          fontSize={lineTokens.font_size}
-                        />
-                      </span>
+                        token={token}
+                        onAbbreviationClick={handleAbbreviationClick}
+                        bold={lineTokens.bold}
+                        italic={lineTokens.italic}
+                        fontSize={lineTokens.font_size}
+                        scaled={token.scaled}
+                      />
                     ))}
                   </div>
                 ),
