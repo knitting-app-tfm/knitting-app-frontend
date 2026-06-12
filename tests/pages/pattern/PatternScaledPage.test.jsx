@@ -102,6 +102,7 @@ describe("PatternScaledPage", () => {
   });
 
   it("shows a loading spinner before the scaled data resolves", () => {
+    patternService.getPattern.mockReturnValue(new Promise(() => {}));
     patternService.getScaledPattern.mockReturnValue(new Promise(() => {}));
     const router = createMemoryRouter(
       [{ path: "/patterns/:id/scaled", element: <PatternScaledPage /> }],

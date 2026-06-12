@@ -44,9 +44,10 @@ function TokenRenderer({
   }
 
   if (token.type === "size_group") {
-    const text = token.values
+    const values = token.values
       .map((v, i) => (i === 0 ? String(v) : `(${v})`))
       .join(" ");
+    const text = token.unit ? `${values} ${token.unit}` : values;
     return (
       <span className={`tr-size-group${scaledClass}`} style={style}>
         {text}

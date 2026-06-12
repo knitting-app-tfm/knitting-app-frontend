@@ -77,7 +77,6 @@ export async function translatePattern(patternId) {
       typeof detail === "string" ? detail : "Error al traducir el patrón",
     );
   }
-  // console.log(response.json());
   return response.json();
 }
 

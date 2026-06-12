@@ -106,7 +106,7 @@ describe("PatternTranslationPage", () => {
   it("renders size_group tokens as first value followed by parenthesised values", async () => {
     await renderPage("42", { tokens: LINES });
 
-    expect(screen.getByText("147 (159) (174)")).toBeInTheDocument();
+    expect(screen.getByText("147 (159) (174) stitches")).toBeInTheDocument();
   });
 
   it("renders a translated abbreviation using its full name with the translated class", async () => {

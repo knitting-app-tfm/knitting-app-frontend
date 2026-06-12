@@ -12,6 +12,7 @@ import {
   getPatterns,
   getScaling,
   putScaling,
+  getScaledPattern,
 } from "../../src/services/patternService";
 
 const API_URL = "http://localhost:8000";
@@ -309,6 +310,41 @@ describe("putScaling", () => {
 
     await expect(putScaling("42", "X", 99)).rejects.toThrow(
       "Failed to save scaling",
+    );
+  });
+});
+
+describe("getScaledPattern", () => {
+  it("GETs /patterns/{id}/scaled and returns the scaled data", async () => {
+    const scaled = { size_label: "M", rows_warning: false, lines: [] };
+    const fetchMock = mockFetch(scaled);
+    vi.stubGlobal("fetch", fetchMock);
+
+    const result = await getScaledPattern("42");
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      `${API_URL}/patterns/42/scaled`,
+      expect.any(Object),
+    );
+    expect(result).toEqual(scaled);
+  });
+
+  it("throws with the detail message when the response is not ok", async () => {
+    vi.stubGlobal(
+      "fetch",
+      mockFetch({ detail: "Scaling not configured" }, false),
+    );
+
+    await expect(getScaledPattern("42")).rejects.toThrow(
+      "Scaling not configured",
+    );
+  });
+
+  it("throws a generic message when detail is not a string", async () => {
+    vi.stubGlobal("fetch", mockFetch({ detail: [{ msg: "error" }] }, false));
+
+    await expect(getScaledPattern("42")).rejects.toThrow(
+      "Failed to load scaled pattern",
     );
   });
 });
