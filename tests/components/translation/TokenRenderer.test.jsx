@@ -40,9 +40,9 @@ describe("TokenRenderer", () => {
         }}
       />,
     );
-    expect(screen.getByText("25 (25) (27) (27) (29) (31)")).toHaveClass(
-      "tr-size-group",
-    );
+    expect(
+      screen.getByText("25 (25) (27) (27) (29) (31) stitches"),
+    ).toHaveClass("tr-size-group");
   });
 
   it("renders a single-value size_group without parentheses", () => {

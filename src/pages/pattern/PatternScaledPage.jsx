@@ -1,21 +1,26 @@
 import { useState, useRef, useEffect } from "react";
-import { useParams, Link, useLocation, useNavigate } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { getAbbreviationByCode } from "../../services/abbreviationService";
-import { getPattern, getScaling } from "../../services/patternService";
+import {
+  getScaledPattern,
+  getPattern,
+  translatePattern,
+} from "../../services/patternService";
 import TokenRenderer from "../../components/translation/TokenRenderer";
 import AbbreviationDetail from "../../components/dictionary/AbbreviationDetail";
 import AdaptPatternModal from "../../components/pattern/AdaptPatternModal";
 import "./PatternDetailPage.css";
 import "./PatternTranslationPage.css";
 
-function PatternTranslationPage() {
+function PatternScaledPage() {
   const { id } = useParams();
-  const { state } = useLocation();
   const navigate = useNavigate();
-  const lines = state?.tokens ?? [];
 
   const [pattern, setPattern] = useState(null);
-  const [scaling, setScaling] = useState(null);
+  const [scaledData, setScaledData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [translating, setTranslating] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
 
   const [selectedAbbr, setSelectedAbbr] = useState(null);
@@ -28,12 +33,14 @@ function PatternTranslationPage() {
     getPattern(id)
       .then(setPattern)
       .catch(() => {});
-    getScaling(id)
-      .then(setScaling)
-      .catch(() => {});
+    getScaledPattern(id)
+      .then(setScaledData)
+      .catch((err) => setError(err.message))
+      .finally(() => setLoading(false));
   }, [id]);
 
   const panelOpen = abbrLoading || selectedAbbr !== null || abbrError !== null;
+  const lines = scaledData?.lines ?? [];
 
   useEffect(() => {
     if (!panelOpen) return;
@@ -48,6 +55,26 @@ function PatternTranslationPage() {
     document.addEventListener("mousedown", handleMouseDown);
     return () => document.removeEventListener("mousedown", handleMouseDown);
   }, [panelOpen]);
+
+  async function handleViewTranslated() {
+    setTranslating(true);
+    try {
+      const tokens = await translatePattern(id);
+      navigate(`/patterns/${id}/translation`, { state: { tokens } });
+    } catch {
+      setTranslating(false);
+    }
+  }
+
+  function handleModalConfirm() {
+    setModalOpen(false);
+    setLoading(true);
+    setError(null);
+    getScaledPattern(id)
+      .then(setScaledData)
+      .catch((err) => setError(err.message))
+      .finally(() => setLoading(false));
+  }
 
   async function handleAbbreviationClick(token) {
     const lookupCode =
@@ -66,11 +93,6 @@ function PatternTranslationPage() {
     }
   }
 
-  function handleModalConfirm() {
-    setModalOpen(false);
-    navigate(`/patterns/${id}/scaled`);
-  }
-
   function handleCloseDetail() {
     fetchCancelledRef.current = true;
     setSelectedAbbr(null);
@@ -85,16 +107,16 @@ function PatternTranslationPage() {
         <span className="kn-breadcrumb__sep">/</span>
         <Link to={`/patterns/${id}`}>Pattern</Link>
         <span className="kn-breadcrumb__sep">/</span>
-        <span className="kn-breadcrumb__current">Translation</span>
+        <span className="kn-breadcrumb__current">Scaled</span>
       </nav>
 
       <div className="pd-header">
         <div className="pt-header-row">
-          <h1 className="pd-header__title">Pattern Translation</h1>
+          <h1 className="pd-header__title">Pattern Scaled</h1>
           <button
             className="pt-adapt-btn"
             onClick={() => setModalOpen(true)}
-            disabled={pattern?.status !== "TOKENIZED"}
+            disabled={!pattern}
           >
             <svg
               width="14"
@@ -112,54 +134,89 @@ function PatternTranslationPage() {
               <line x1="21" y1="3" x2="14" y2="10" />
               <line x1="3" y1="21" x2="10" y2="14" />
             </svg>
-            Adapt pattern
+            Edit adaptation
           </button>
         </div>
       </div>
 
-      <div className="pt-card">
-        <div className="pt-card__head">
-          <div className="pt-toggles">
-            <button className="pt-toggle-btn pt-toggle-btn--active" disabled>
-              Translated
-            </button>
-            {scaling ? (
-              <Link to={`/patterns/${id}/scaled`} className="pt-toggle-btn">
-                Scaled
-              </Link>
-            ) : (
-              <span className="pt-toggle-btn pt-toggle-btn--disabled">
-                Scaled
-              </span>
-            )}
+      {loading && (
+        <div className="d-flex justify-content-center py-5">
+          <div
+            className="spinner-border"
+            role="status"
+            style={{ color: "var(--kn-primary)" }}
+          >
+            <span className="visually-hidden">Loading…</span>
           </div>
         </div>
+      )}
 
-        <div className="pt-pattern">
-          {lines.map((lineTokens, i) =>
-            lineTokens.tokens.length === 0 ? (
-              <div
-                key={i}
-                className="pt-line pt-line--blank"
-                aria-hidden="true"
-              />
-            ) : (
-              <div key={i} className="pt-line">
-                {lineTokens.tokens.map((token, j) => (
-                  <TokenRenderer
-                    key={j}
-                    token={token}
-                    onAbbreviationClick={handleAbbreviationClick}
-                    bold={lineTokens.bold}
-                    italic={lineTokens.italic}
-                    fontSize={lineTokens.font_size}
-                  />
-                ))}
-              </div>
-            ),
-          )}
+      {error && (
+        <div className="alert alert-danger" role="alert">
+          {error}
         </div>
-      </div>
+      )}
+
+      {!loading && !error && scaledData && (
+        <>
+          {scaledData.rows_warning && (
+            <div className="alert alert-warning" role="alert">
+              Row gauge was not provided, so rounds have not been scaled.
+            </div>
+          )}
+
+          <div className="pt-card">
+            <div className="pt-card__head">
+              <div className="pt-toggles">
+                <button
+                  className="pt-toggle-btn"
+                  onClick={handleViewTranslated}
+                  disabled={translating}
+                >
+                  {translating ? "Loading…" : "Translated"}
+                </button>
+                <button
+                  className="pt-toggle-btn pt-toggle-btn--active"
+                  disabled
+                >
+                  Scaled
+                </button>
+              </div>
+              {scaledData.size_label && (
+                <span className="pt-size-label">
+                  Viewing pattern for size {scaledData.size_label}
+                </span>
+              )}
+            </div>
+
+            <div className="pt-pattern">
+              {lines.map((lineTokens, i) =>
+                lineTokens.tokens.length === 0 ? (
+                  <div
+                    key={i}
+                    className="pt-line pt-line--blank"
+                    aria-hidden="true"
+                  />
+                ) : (
+                  <div key={i} className="pt-line">
+                    {lineTokens.tokens.map((token, j) => (
+                      <TokenRenderer
+                        key={j}
+                        token={token}
+                        onAbbreviationClick={handleAbbreviationClick}
+                        bold={lineTokens.bold}
+                        italic={lineTokens.italic}
+                        fontSize={lineTokens.font_size}
+                        scaled={token.scaled}
+                      />
+                    ))}
+                  </div>
+                ),
+              )}
+            </div>
+          </div>
+        </>
+      )}
 
       {modalOpen && pattern && (
         <AdaptPatternModal
@@ -196,4 +253,4 @@ function PatternTranslationPage() {
   );
 }
 
-export default PatternTranslationPage;
+export default PatternScaledPage;

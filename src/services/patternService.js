@@ -77,7 +77,53 @@ export async function translatePattern(patternId) {
       typeof detail === "string" ? detail : "Error al traducir el patrón",
     );
   }
-  // console.log(response.json());
+  return response.json();
+}
+
+export async function getScaling(patternId) {
+  const response = await apiFetch(`/patterns/${patternId}/scaling`);
+
+  if (response.status === 404) return null;
+
+  if (!response.ok) {
+    const error = await response.json();
+    const detail = error.detail;
+    throw new Error(
+      typeof detail === "string" ? detail : "Failed to load scaling",
+    );
+  }
+
+  return response.json();
+}
+
+export async function putScaling(patternId, scalingData) {
+  const response = await apiFetch(`/patterns/${patternId}/scaling`, {
+    method: "PUT",
+    body: JSON.stringify(scalingData),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    const detail = error.detail;
+    throw new Error(
+      typeof detail === "string" ? detail : "Failed to save scaling",
+    );
+  }
+
+  return response.json();
+}
+
+export async function getScaledPattern(patternId) {
+  const response = await apiFetch(`/patterns/${patternId}/scaled`);
+
+  if (!response.ok) {
+    const error = await response.json();
+    const detail = error.detail;
+    throw new Error(
+      typeof detail === "string" ? detail : "Failed to load scaled pattern",
+    );
+  }
+
   return response.json();
 }
 

@@ -11,6 +11,7 @@ import ConfirmPatternPage from "../pages/confirm/ConfirmPatternPage";
 import DictionaryPage from "../pages/dictionary/DictionaryPage";
 import PatternDetailPage from "../pages/pattern/PatternDetailPage";
 import PatternTranslationPage from "../pages/pattern/PatternTranslationPage";
+import PatternScaledPage from "../pages/pattern/PatternScaledPage";
 
 const router = createBrowserRouter([
   {
@@ -29,6 +30,7 @@ const router = createBrowserRouter([
         path: "/patterns/:id/translation",
         element: <PatternTranslationPage />,
       },
+      { path: "/patterns/:id/scaled", element: <PatternScaledPage /> },
       { path: "/dictionary", element: <DictionaryPage /> },
     ],
   },

@@ -240,6 +240,7 @@ describe("ConfirmPatternForm", () => {
       />,
     );
 
+    fireEvent.click(screen.getByLabelText("This pattern is one size"));
     fireEvent.click(screen.getByRole("button", { name: "Add size" }));
 
     expect(screen.getByText("No sizes added yet")).toBeInTheDocument();
@@ -255,7 +256,7 @@ describe("ConfirmPatternForm", () => {
       />,
     );
 
-    expect(screen.getByText("No sizes added yet")).toBeInTheDocument();
+    expect(screen.getByText("One size")).toBeInTheDocument();
     expect(screen.getByText("No yarns added yet")).toBeInTheDocument();
   });
 
@@ -348,6 +349,8 @@ describe("ConfirmPatternForm", () => {
       />,
     );
 
+    fireEvent.click(screen.getByLabelText("This pattern is one size"));
+
     const sizeInput = screen.getByLabelText("New size");
     fireEvent.change(sizeInput, { target: { value: "XL" } });
     fireEvent.keyDown(sizeInput, { key: "a" });
@@ -437,7 +440,7 @@ describe("ConfirmPatternForm", () => {
       />,
     );
 
-    expect(screen.getByText("No sizes added yet")).toBeInTheDocument();
+    expect(screen.getByText("One size")).toBeInTheDocument();
     expect(screen.getByText("No yarns added yet")).toBeInTheDocument();
 
     fireEvent.click(getConfirmButton());
@@ -526,6 +529,90 @@ describe("ConfirmPatternForm", () => {
     expect(
       screen.getByText("Only JPG, PNG and WebP images are allowed."),
     ).toBeInTheDocument();
+  });
+
+  it("triggers the file input when the cover image area is clicked", () => {
+    render(
+      <ConfirmPatternForm
+        initialData={INITIAL_DATA}
+        onSubmit={vi.fn()}
+        loading={false}
+        error={null}
+      />,
+    );
+
+    const input = document.getElementById("coverImage");
+    const clickSpy = vi.spyOn(input, "click").mockImplementation(() => {});
+
+    const preview = screen.getByRole("button", { name: "Upload cover image" });
+    fireEvent.click(preview);
+
+    expect(clickSpy).toHaveBeenCalled();
+  });
+
+  it("triggers the file input when Enter is pressed on the cover image area", () => {
+    render(
+      <ConfirmPatternForm
+        initialData={INITIAL_DATA}
+        onSubmit={vi.fn()}
+        loading={false}
+        error={null}
+      />,
+    );
+
+    const input = document.getElementById("coverImage");
+    const clickSpy = vi.spyOn(input, "click").mockImplementation(() => {});
+
+    const preview = screen.getByRole("button", { name: "Upload cover image" });
+    fireEvent.keyDown(preview, { key: "Enter" });
+
+    expect(clickSpy).toHaveBeenCalled();
+  });
+
+  it("clears sizes when the one-size checkbox is checked on a multi-size pattern", () => {
+    const onSubmit = vi.fn();
+    render(
+      <ConfirmPatternForm
+        initialData={INITIAL_DATA}
+        onSubmit={onSubmit}
+        loading={false}
+        error={null}
+      />,
+    );
+
+    expect(screen.getByText("XS")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByLabelText("This pattern is one size"));
+
+    expect(screen.queryByText("XS")).not.toBeInTheDocument();
+    expect(screen.getByText("One size")).toBeInTheDocument();
+
+    fireEvent.click(getConfirmButton());
+    expect(onSubmit.mock.calls[0][0].sizes).toEqual([]);
+  });
+
+  it("revokes the previous object URL when a subsequent file change clears the preview", () => {
+    const revokeObjectURL = vi.spyOn(URL, "revokeObjectURL");
+
+    render(
+      <ConfirmPatternForm
+        initialData={INITIAL_DATA}
+        onSubmit={vi.fn()}
+        loading={false}
+        error={null}
+      />,
+    );
+
+    const validFile = new File(["img"], "cover.jpg", { type: "image/jpeg" });
+    fireEvent.change(document.getElementById("coverImage"), {
+      target: { files: [validFile] },
+    });
+
+    fireEvent.change(document.getElementById("coverImage"), {
+      target: { files: [] },
+    });
+
+    expect(revokeObjectURL).toHaveBeenCalled();
   });
 
   it("changes craft via the visual radio toggle", () => {
