@@ -5,6 +5,7 @@ import {
   getScaledPattern,
   getPattern,
   translatePattern,
+  getYarnCalculation,
 } from "../../services/patternService";
 import TokenRenderer from "../../components/translation/TokenRenderer";
 import AbbreviationDetail from "../../components/dictionary/AbbreviationDetail";
@@ -24,12 +25,22 @@ function PatternScaledPage() {
   const [translating, setTranslating] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [yarnModalOpen, setYarnModalOpen] = useState(false);
+  const [yarnSummary, setYarnSummary] = useState(null);
 
   const [selectedAbbr, setSelectedAbbr] = useState(null);
   const [abbrLoading, setAbbrLoading] = useState(false);
   const [abbrError, setAbbrError] = useState(null);
   const detailRef = useRef(null);
   const fetchCancelledRef = useRef(false);
+
+  function fetchYarnSummary() {
+    getYarnCalculation(id)
+      .then((raw) => {
+        const yarns = Array.isArray(raw) ? raw : (raw.yarns ?? [raw]);
+        setYarnSummary(yarns);
+      })
+      .catch(() => setYarnSummary("prompt"));
+  }
 
   useEffect(() => {
     getPattern(id)
@@ -39,7 +50,8 @@ function PatternScaledPage() {
       .then(setScaledData)
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
-  }, [id]);
+    fetchYarnSummary();
+  }, [id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const panelOpen = abbrLoading || selectedAbbr !== null || abbrError !== null;
   const lines = scaledData?.lines ?? [];
@@ -66,6 +78,11 @@ function PatternScaledPage() {
     } catch {
       setTranslating(false);
     }
+  }
+
+  function handleYarnModalClose() {
+    setYarnModalOpen(false);
+    fetchYarnSummary();
   }
 
   function handleModalConfirm() {
@@ -117,13 +134,6 @@ function PatternScaledPage() {
           <h1 className="pd-header__title">Pattern Scaled</h1>
           <button
             className="pt-adapt-btn"
-            onClick={() => setYarnModalOpen(true)}
-            disabled={!pattern}
-          >
-            Calculate yarn needed
-          </button>
-          <button
-            className="pt-adapt-btn"
             onClick={() => setModalOpen(true)}
             disabled={!pattern}
           >
@@ -163,6 +173,77 @@ function PatternScaledPage() {
       {error && (
         <div className="alert alert-danger" role="alert">
           {error}
+        </div>
+      )}
+
+      {Array.isArray(yarnSummary) && (
+        <div className="pt-yarn-summary">
+          <div className="pt-yarn-summary__head">
+            <h2 className="pt-yarn-summary__title">Yarn summary</h2>
+            <button
+              className="pt-yarn-edit-btn"
+              onClick={() => setYarnModalOpen(true)}
+              disabled={!pattern}
+            >
+              Edit yarn data
+            </button>
+          </div>
+          <ul className="pt-yarn-summary__list">
+            {yarnSummary.map((item, i) => {
+              const py = item.pattern_yarn ?? {};
+              const uy = item.user_yarn ?? {};
+              const patternLabel = py.label || `Yarn ${i + 1}`;
+              const userLabel =
+                uy.label && uy.label !== py.label ? uy.label : null;
+              return (
+                <li key={i} className="pt-yarn-summary__item">
+                  <span className="pt-yarn-summary__name">
+                    {patternLabel}
+                    {userLabel && (
+                      <span className="pt-yarn-summary__user-yarn">
+                        {" "}
+                        ({userLabel})
+                      </span>
+                    )}
+                    :
+                  </span>{" "}
+                  {item.calculated ? (
+                    <>
+                      <span className="pt-yarn-summary__value">
+                        ~{Math.round(item.result?.grams_needed)} g (~
+                        {item.result?.skeins_needed} skeins)
+                      </span>
+                      {item.weight_warning && (
+                        <span className="pt-yarn-summary__warning">
+                          ⚠ Different yarn weight
+                        </span>
+                      )}
+                    </>
+                  ) : (
+                    <span className="pt-yarn-summary__message">
+                      {item.message}
+                    </span>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      )}
+
+      {yarnSummary === "prompt" && (
+        <div className="pt-yarn-prompt">
+          <p className="pt-yarn-prompt__text">
+            Add your yarn information to know how much you'll need for this
+            project.
+          </p>
+          <button
+            className="pt-yarn-prompt__btn"
+            onClick={() => setYarnModalOpen(true)}
+            disabled={!pattern}
+          >
+            Calculate yarn needed
+          </button>
         </div>
       )}
 
@@ -236,10 +317,7 @@ function PatternScaledPage() {
       )}
 
       {yarnModalOpen && pattern && (
-        <YarnCalculatorModal
-          pattern={pattern}
-          onClose={() => setYarnModalOpen(false)}
-        />
+        <YarnCalculatorModal pattern={pattern} onClose={handleYarnModalClose} />
       )}
 
       <div
