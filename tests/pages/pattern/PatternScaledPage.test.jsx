@@ -22,6 +22,14 @@ vi.mock("../../../src/components/pattern/AdaptPatternModal", () => ({
   ),
 }));
 
+vi.mock("../../../src/components/pattern/YarnCalculatorModal", () => ({
+  default: ({ onClose }) => (
+    <div data-testid="yarn-modal">
+      <button onClick={onClose}>Close yarn modal</button>
+    </div>
+  ),
+}));
+
 const PATTERN = {
   id: "42",
   title: "Test Pattern",
@@ -399,6 +407,61 @@ describe("PatternScaledPage", () => {
     expect(
       screen.queryByText("A basic knitting stitch"),
     ).not.toBeInTheDocument();
+  });
+
+  it("renders the Calculate yarn needed button", async () => {
+    await renderPage();
+
+    expect(
+      screen.getByRole("button", { name: /calculate yarn needed/i }),
+    ).toBeInTheDocument();
+  });
+
+  it("disables the Calculate yarn needed button until pattern loads", async () => {
+    let resolvePattern;
+    patternService.getPattern.mockReturnValue(
+      new Promise((res) => {
+        resolvePattern = res;
+      }),
+    );
+    const router = createMemoryRouter(
+      [{ path: "/patterns/:id/scaled", element: <PatternScaledPage /> }],
+      { initialEntries: ["/patterns/42/scaled"] },
+    );
+    render(<RouterProvider router={router} />);
+
+    expect(
+      screen.getByRole("button", { name: /calculate yarn needed/i }),
+    ).toBeDisabled();
+
+    await act(async () => {
+      resolvePattern(PATTERN);
+    });
+
+    expect(
+      screen.getByRole("button", { name: /calculate yarn needed/i }),
+    ).not.toBeDisabled();
+  });
+
+  it("opens the yarn modal when Calculate yarn needed is clicked", async () => {
+    await renderPage();
+
+    fireEvent.click(
+      screen.getByRole("button", { name: /calculate yarn needed/i }),
+    );
+
+    expect(screen.getByTestId("yarn-modal")).toBeInTheDocument();
+  });
+
+  it("closes the yarn modal when onClose is triggered", async () => {
+    await renderPage();
+    fireEvent.click(
+      screen.getByRole("button", { name: /calculate yarn needed/i }),
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Close yarn modal" }));
+
+    expect(screen.queryByTestId("yarn-modal")).not.toBeInTheDocument();
   });
 
   it("does not close the detail panel when clicking inside it", async () => {

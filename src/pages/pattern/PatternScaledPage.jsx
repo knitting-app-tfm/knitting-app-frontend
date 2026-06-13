@@ -9,6 +9,7 @@ import {
 import TokenRenderer from "../../components/translation/TokenRenderer";
 import AbbreviationDetail from "../../components/dictionary/AbbreviationDetail";
 import AdaptPatternModal from "../../components/pattern/AdaptPatternModal";
+import YarnCalculatorModal from "../../components/pattern/YarnCalculatorModal";
 import "./PatternDetailPage.css";
 import "./PatternTranslationPage.css";
 
@@ -22,6 +23,7 @@ function PatternScaledPage() {
   const [error, setError] = useState(null);
   const [translating, setTranslating] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
+  const [yarnModalOpen, setYarnModalOpen] = useState(false);
 
   const [selectedAbbr, setSelectedAbbr] = useState(null);
   const [abbrLoading, setAbbrLoading] = useState(false);
@@ -113,6 +115,13 @@ function PatternScaledPage() {
       <div className="pd-header">
         <div className="pt-header-row">
           <h1 className="pd-header__title">Pattern Scaled</h1>
+          <button
+            className="pt-adapt-btn"
+            onClick={() => setYarnModalOpen(true)}
+            disabled={!pattern}
+          >
+            Calculate yarn needed
+          </button>
           <button
             className="pt-adapt-btn"
             onClick={() => setModalOpen(true)}
@@ -223,6 +232,13 @@ function PatternScaledPage() {
           pattern={pattern}
           onClose={() => setModalOpen(false)}
           onConfirm={handleModalConfirm}
+        />
+      )}
+
+      {yarnModalOpen && pattern && (
+        <YarnCalculatorModal
+          pattern={pattern}
+          onClose={() => setYarnModalOpen(false)}
         />
       )}
 

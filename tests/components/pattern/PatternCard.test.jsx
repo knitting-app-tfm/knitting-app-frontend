@@ -177,4 +177,29 @@ describe("PatternCard", () => {
 
     expect(screen.getByText("PENDING")).toBeInTheDocument();
   });
+
+  it("shows 'View scaled' link when status is TOKENIZED and scaling exists", async () => {
+    patternService.getScaling.mockResolvedValue({
+      size_label: "M",
+      size_position: 1,
+    });
+    renderCard({ ...BASE_PATTERN, status: "TOKENIZED" });
+
+    await waitFor(() => {
+      expect(
+        screen.getByRole("link", { name: /view scaled/i }),
+      ).toBeInTheDocument();
+    });
+  });
+
+  it("falls back to translate button when getScaling rejects for a TOKENIZED pattern", async () => {
+    patternService.getScaling.mockRejectedValue(new Error("Network error"));
+    renderCard({ ...BASE_PATTERN, status: "TOKENIZED" });
+
+    await waitFor(() => {
+      expect(
+        screen.getByRole("button", { name: /view translated/i }),
+      ).toBeInTheDocument();
+    });
+  });
 });

@@ -127,6 +127,40 @@ export async function getScaledPattern(patternId) {
   return response.json();
 }
 
+export async function getUserYarns(patternId) {
+  const response = await apiFetch(`/patterns/${patternId}/yarns`);
+
+  if (!response.ok) {
+    const error = await response.json();
+    const detail = error.detail;
+    throw new Error(
+      typeof detail === "string" ? detail : "Failed to load user yarns",
+    );
+  }
+
+  return response.json();
+}
+
+export async function putUserYarn(patternId, patternYarnId, data) {
+  const response = await apiFetch(
+    `/patterns/${patternId}/yarns/${patternYarnId}`,
+    {
+      method: "PUT",
+      body: JSON.stringify(data),
+    },
+  );
+
+  if (!response.ok) {
+    const error = await response.json();
+    const detail = error.detail;
+    throw new Error(
+      typeof detail === "string" ? detail : "Failed to save user yarn",
+    );
+  }
+
+  return response.json();
+}
+
 export async function importPatternFromText(text) {
   const response = await apiFetch(`/patterns/import/text`, {
     method: "POST",
