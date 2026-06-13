@@ -161,6 +161,20 @@ export async function putUserYarn(patternId, patternYarnId, data) {
   return response.json();
 }
 
+export async function getYarnCalculation(patternId) {
+  const response = await apiFetch(`/patterns/${patternId}/yarn-calculation`);
+
+  if (!response.ok) {
+    const error = await response.json();
+    const detail = error.detail;
+    throw new Error(
+      typeof detail === "string" ? detail : "Failed to calculate yarn needed",
+    );
+  }
+
+  return response.json();
+}
+
 export async function importPatternFromText(text) {
   const response = await apiFetch(`/patterns/import/text`, {
     method: "POST",

@@ -63,6 +63,34 @@ const PATTERN_NULL_YARN = {
   ],
 };
 
+const CALC_RESULT = {
+  size_label: "M",
+  yarns: [
+    {
+      pattern_yarn_id: "yarn-1",
+      calculated: true,
+      weight_warning: false,
+      message: null,
+      pattern_yarn: {
+        label: "Main yarn",
+        yarn_weight: "DK",
+        meters_per_unit: 200,
+        grams_per_unit: 100,
+        strands: 1,
+        grams_needed: 200,
+      },
+      result: { grams_needed: 180, skeins_needed: 2 },
+      user_yarn: {
+        label: "Main yarn",
+        yarn_weight: "DK",
+        meters_per_unit: 200,
+        grams_per_unit: 100,
+        strands: 1,
+      },
+    },
+  ],
+};
+
 async function renderModal(pattern = PATTERN, onClose = vi.fn()) {
   await act(async () => {
     render(<YarnCalculatorModal pattern={pattern} onClose={onClose} />);
@@ -72,6 +100,7 @@ async function renderModal(pattern = PATTERN, onClose = vi.fn()) {
 beforeEach(() => {
   patternService.getUserYarns.mockResolvedValue([]);
   patternService.putUserYarn.mockResolvedValue({ id: "yarn-1" });
+  patternService.getYarnCalculation.mockResolvedValue(CALC_RESULT);
 });
 
 afterEach(() => {
@@ -108,9 +137,9 @@ describe("YarnCalculatorModal", () => {
     ).toBeInTheDocument();
   });
 
-  it("Confirm button is disabled when there are no yarns", async () => {
+  it("Calculate button is disabled when there are no yarns", async () => {
     await renderModal(PATTERN_NO_YARNS);
-    expect(screen.getByRole("button", { name: "Confirm" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Calculate" })).toBeDisabled();
   });
 
   it("closes when the close button is clicked", async () => {
@@ -156,7 +185,7 @@ describe("YarnCalculatorModal", () => {
     await renderModal();
     fireEvent.click(screen.getByRole("checkbox", { name: /use same yarn/i }));
     await act(async () => {
-      fireEvent.click(screen.getByRole("button", { name: "Confirm" }));
+      fireEvent.click(screen.getByRole("button", { name: "Calculate" }));
     });
     expect(patternService.putUserYarn).toHaveBeenCalledOnce();
   });
@@ -169,26 +198,26 @@ describe("YarnCalculatorModal", () => {
     expect(screen.getByLabelText(/m\/skein/)).not.toBeDisabled();
   });
 
-  it("shows validation error when m/skein is empty on Confirm", async () => {
+  it("shows validation error when m/skein is empty on Calculate", async () => {
     await renderModal();
-    fireEvent.click(screen.getByRole("button", { name: "Confirm" }));
+    fireEvent.click(screen.getByRole("button", { name: "Calculate" }));
     expect(
       screen.getByText("Meters per skein are required"),
     ).toBeInTheDocument();
   });
 
-  it("shows validation error when g/skein is empty on Confirm", async () => {
+  it("shows validation error when g/skein is empty on Calculate", async () => {
     await renderModal();
     fireEvent.change(screen.getByLabelText(/m\/skein/), {
       target: { value: "200" },
     });
-    fireEvent.click(screen.getByRole("button", { name: "Confirm" }));
+    fireEvent.click(screen.getByRole("button", { name: "Calculate" }));
     expect(
       screen.getByText("Grams per skein are required"),
     ).toBeInTheDocument();
   });
 
-  it("shows validation error when strands is empty on Confirm", async () => {
+  it("shows validation error when strands is empty on Calculate", async () => {
     await renderModal();
     fireEvent.change(screen.getByLabelText(/m\/skein/), {
       target: { value: "200" },
@@ -196,7 +225,7 @@ describe("YarnCalculatorModal", () => {
     fireEvent.change(screen.getByLabelText(/g\/skein/), {
       target: { value: "100" },
     });
-    fireEvent.click(screen.getByRole("button", { name: "Confirm" }));
+    fireEvent.click(screen.getByRole("button", { name: "Calculate" }));
     expect(
       screen.getByText("Number of strands is required"),
     ).toBeInTheDocument();
@@ -207,7 +236,7 @@ describe("YarnCalculatorModal", () => {
     fireEvent.change(screen.getByLabelText(/m\/skein/), {
       target: { value: "0" },
     });
-    fireEvent.click(screen.getByRole("button", { name: "Confirm" }));
+    fireEvent.click(screen.getByRole("button", { name: "Calculate" }));
     expect(
       screen.getAllByText("Value must be greater than zero").length,
     ).toBeGreaterThan(0);
@@ -224,7 +253,7 @@ describe("YarnCalculatorModal", () => {
     fireEvent.change(screen.getByLabelText(/strands/i), {
       target: { value: "1.5" },
     });
-    fireEvent.click(screen.getByRole("button", { name: "Confirm" }));
+    fireEvent.click(screen.getByRole("button", { name: "Calculate" }));
     expect(
       screen.getByText("Number of strands must be a whole number"),
     ).toBeInTheDocument();
@@ -232,13 +261,13 @@ describe("YarnCalculatorModal", () => {
 
   it("does not call putUserYarn when validation fails", async () => {
     await renderModal();
-    fireEvent.click(screen.getByRole("button", { name: "Confirm" }));
+    fireEvent.click(screen.getByRole("button", { name: "Calculate" }));
     expect(patternService.putUserYarn).not.toHaveBeenCalled();
   });
 
   it("clears the m/skein error when the field is edited", async () => {
     await renderModal();
-    fireEvent.click(screen.getByRole("button", { name: "Confirm" }));
+    fireEvent.click(screen.getByRole("button", { name: "Calculate" }));
     expect(
       screen.getByText("Meters per skein are required"),
     ).toBeInTheDocument();
@@ -251,7 +280,7 @@ describe("YarnCalculatorModal", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("calls putUserYarn with the correct payload on successful Confirm", async () => {
+  it("calls putUserYarn with the correct payload on successful Calculate", async () => {
     await renderModal();
     fireEvent.change(screen.getByLabelText(/m\/skein/), {
       target: { value: "180" },
@@ -264,7 +293,7 @@ describe("YarnCalculatorModal", () => {
     });
 
     await act(async () => {
-      fireEvent.click(screen.getByRole("button", { name: "Confirm" }));
+      fireEvent.click(screen.getByRole("button", { name: "Calculate" }));
     });
 
     expect(patternService.putUserYarn).toHaveBeenCalledWith(
@@ -278,7 +307,7 @@ describe("YarnCalculatorModal", () => {
     );
   });
 
-  it("calls onClose after a successful Confirm", async () => {
+  it("shows the results step and Done button after a successful Calculate", async () => {
     const onClose = vi.fn();
     await renderModal(PATTERN, onClose);
     fireEvent.change(screen.getByLabelText(/m\/skein/), {
@@ -292,14 +321,19 @@ describe("YarnCalculatorModal", () => {
     });
 
     await act(async () => {
-      fireEvent.click(screen.getByRole("button", { name: "Confirm" }));
+      fireEvent.click(screen.getByRole("button", { name: "Calculate" }));
     });
 
+    expect(screen.getByRole("button", { name: "Done" })).toBeInTheDocument();
+    expect(onClose).not.toHaveBeenCalled();
+
+    fireEvent.click(screen.getByRole("button", { name: "Done" }));
     expect(onClose).toHaveBeenCalledOnce();
   });
 
   it("calls putUserYarn for each yarn on a multi-yarn pattern", async () => {
     patternService.putUserYarn.mockResolvedValue({});
+    patternService.getYarnCalculation.mockResolvedValue({ yarns: [] });
     await renderModal(PATTERN_TWO_YARNS);
 
     const mpuInputs = screen.getAllByLabelText(/m\/skein/);
@@ -314,7 +348,7 @@ describe("YarnCalculatorModal", () => {
     fireEvent.change(strandsInputs[1], { target: { value: "2" } });
 
     await act(async () => {
-      fireEvent.click(screen.getByRole("button", { name: "Confirm" }));
+      fireEvent.click(screen.getByRole("button", { name: "Calculate" }));
     });
 
     expect(patternService.putUserYarn).toHaveBeenCalledTimes(2);
@@ -345,7 +379,7 @@ describe("YarnCalculatorModal", () => {
     });
 
     await act(async () => {
-      fireEvent.click(screen.getByRole("button", { name: "Confirm" }));
+      fireEvent.click(screen.getByRole("button", { name: "Calculate" }));
     });
 
     expect(screen.getByRole("alert")).toHaveTextContent("Server error");
@@ -384,7 +418,7 @@ describe("YarnCalculatorModal", () => {
     });
 
     await act(async () => {
-      fireEvent.click(screen.getByRole("button", { name: "Confirm" }));
+      fireEvent.click(screen.getByRole("button", { name: "Calculate" }));
     });
 
     expect(patternService.putUserYarn).toHaveBeenCalledWith(
@@ -410,7 +444,7 @@ describe("YarnCalculatorModal", () => {
     });
 
     await act(async () => {
-      fireEvent.click(screen.getByRole("button", { name: "Confirm" }));
+      fireEvent.click(screen.getByRole("button", { name: "Calculate" }));
     });
 
     expect(patternService.putUserYarn).toHaveBeenCalledWith(
@@ -436,7 +470,7 @@ describe("YarnCalculatorModal", () => {
     });
 
     await act(async () => {
-      fireEvent.click(screen.getByRole("button", { name: "Confirm" }));
+      fireEvent.click(screen.getByRole("button", { name: "Calculate" }));
     });
 
     expect(patternService.putUserYarn).toHaveBeenCalledWith(
@@ -487,7 +521,7 @@ describe("YarnCalculatorModal", () => {
     expect(mpuInputs[1]).not.toBeDisabled();
   });
 
-  it("shows the Saving… spinner while putUserYarn is pending", async () => {
+  it("shows the Calculating… spinner while the request is pending", async () => {
     patternService.putUserYarn.mockReturnValue(new Promise(() => {}));
     await renderModal();
     fireEvent.change(screen.getByLabelText(/m\/skein/), {
@@ -499,10 +533,10 @@ describe("YarnCalculatorModal", () => {
     fireEvent.change(screen.getByLabelText(/strands/i), {
       target: { value: "1" },
     });
-    fireEvent.click(screen.getByRole("button", { name: "Confirm" }));
+    fireEvent.click(screen.getByRole("button", { name: "Calculate" }));
 
     await waitFor(() => {
-      expect(screen.getByText("Saving…")).toBeInTheDocument();
+      expect(screen.getByText("Calculating…")).toBeInTheDocument();
     });
   });
 });
