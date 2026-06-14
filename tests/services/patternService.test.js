@@ -13,6 +13,8 @@ import {
   getScaling,
   putScaling,
   getScaledPattern,
+  getUserYarns,
+  putUserYarn,
 } from "../../src/services/patternService";
 
 const API_URL = "http://localhost:8000";
@@ -345,6 +347,119 @@ describe("getScaledPattern", () => {
 
     await expect(getScaledPattern("42")).rejects.toThrow(
       "Failed to load scaled pattern",
+    );
+  });
+});
+
+describe("confirmPattern grams_needed", () => {
+  it("test_confirm_grams_needed_length_mismatch: propagates 400 when array length does not match sizes", async () => {
+    vi.stubGlobal(
+      "fetch",
+      mockFetch({ detail: "grams_needed length must match sizes" }, false),
+    );
+
+    const fd = new FormData();
+    fd.append("sizes", JSON.stringify(["S"]));
+    fd.append("yarns", JSON.stringify([{ grams_needed: [100, 200] }]));
+
+    await expect(confirmPattern("42", fd)).rejects.toThrow(
+      "grams_needed length must match sizes",
+    );
+  });
+
+  it("test_confirm_grams_needed_one_size: accepts a single-element grams_needed array", async () => {
+    const confirmed = { id: "42", status: "CONFIRMED" };
+    vi.stubGlobal("fetch", mockFetch(confirmed));
+
+    const fd = new FormData();
+    fd.append("sizes", JSON.stringify([]));
+    fd.append("yarns", JSON.stringify([{ grams_needed: [100] }]));
+
+    const result = await confirmPattern("42", fd);
+
+    expect(result).toEqual(confirmed);
+  });
+
+  it("test_confirm_grams_needed_null: accepts null grams_needed", async () => {
+    const confirmed = { id: "42", status: "CONFIRMED" };
+    vi.stubGlobal("fetch", mockFetch(confirmed));
+
+    const fd = new FormData();
+    fd.append("yarns", JSON.stringify([{ grams_needed: null }]));
+
+    const result = await confirmPattern("42", fd);
+
+    expect(result).toEqual(confirmed);
+  });
+});
+
+describe("getUserYarns", () => {
+  it("GETs /patterns/{id}/yarns and returns the list", async () => {
+    const yarns = [{ pattern_yarn_id: "1", meters_per_unit: 200 }];
+    const fetchMock = mockFetch(yarns);
+    vi.stubGlobal("fetch", fetchMock);
+
+    const result = await getUserYarns("42");
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      `${API_URL}/patterns/42/yarns`,
+      expect.any(Object),
+    );
+    expect(result).toEqual(yarns);
+  });
+
+  it("throws with the detail message when the response is not ok", async () => {
+    vi.stubGlobal("fetch", mockFetch({ detail: "Pattern not found" }, false));
+
+    await expect(getUserYarns("42")).rejects.toThrow("Pattern not found");
+  });
+
+  it("throws a generic message when detail is not a string", async () => {
+    vi.stubGlobal("fetch", mockFetch({ detail: [{ msg: "error" }] }, false));
+
+    await expect(getUserYarns("42")).rejects.toThrow(
+      "Failed to load user yarns",
+    );
+  });
+});
+
+describe("putUserYarn", () => {
+  it("PUTs to /patterns/{id}/yarns/{yarn_id} with JSON body", async () => {
+    const payload = { meters_per_unit: 200, grams_per_unit: 100, strands: 1 };
+    const fetchMock = mockFetch({ ...payload, id: "1" });
+    vi.stubGlobal("fetch", fetchMock);
+
+    await putUserYarn("42", "1", payload);
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      `${API_URL}/patterns/42/yarns/1`,
+      expect.objectContaining({
+        method: "PUT",
+        body: JSON.stringify(payload),
+      }),
+    );
+  });
+
+  it("returns the parsed result on success", async () => {
+    const result = { id: "1", meters_per_unit: 200 };
+    vi.stubGlobal("fetch", mockFetch(result));
+
+    const data = await putUserYarn("42", "1", { meters_per_unit: 200 });
+
+    expect(data).toEqual(result);
+  });
+
+  it("throws with the detail message when the response is not ok", async () => {
+    vi.stubGlobal("fetch", mockFetch({ detail: "Invalid data" }, false));
+
+    await expect(putUserYarn("42", "1", {})).rejects.toThrow("Invalid data");
+  });
+
+  it("throws a generic message when detail is not a string", async () => {
+    vi.stubGlobal("fetch", mockFetch({ detail: [{ msg: "error" }] }, false));
+
+    await expect(putUserYarn("42", "1", {})).rejects.toThrow(
+      "Failed to save user yarn",
     );
   });
 });

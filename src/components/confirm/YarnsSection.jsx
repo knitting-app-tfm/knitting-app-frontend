@@ -130,7 +130,14 @@ function YarnBallIllustration() {
   );
 }
 
-function YarnsSection({ yarns, onAddYarn, onRemoveYarn, onYarnChange }) {
+function YarnsSection({
+  yarns,
+  sizes,
+  onAddYarn,
+  onRemoveYarn,
+  onYarnChange,
+  onYarnGramsNeededChange,
+}) {
   return (
     <>
       <div className="cp-yarn-intro">
@@ -249,24 +256,6 @@ function YarnsSection({ yarns, onAddYarn, onRemoveYarn, onYarnChange }) {
             </div>
             <div className="cp-yarn-stat">
               <label className="cp-label" style={{ fontSize: "0.8rem" }}>
-                Grams needed
-              </label>
-              <span className="cp-hint">
-                Total yarn needed to complete the project.
-              </span>
-              <input
-                type="number"
-                min="0"
-                step="any"
-                className="form-control form-control-sm"
-                value={yarn.grams_needed}
-                onChange={(e) =>
-                  onYarnChange(i, "grams_needed", e.target.value)
-                }
-              />
-            </div>
-            <div className="cp-yarn-stat">
-              <label className="cp-label" style={{ fontSize: "0.8rem" }}>
                 Strands
               </label>
               <span className="cp-hint">
@@ -282,6 +271,51 @@ function YarnsSection({ yarns, onAddYarn, onRemoveYarn, onYarnChange }) {
                   onYarnChange(i, "strands", parseInt(e.target.value, 10) || 1)
                 }
               />
+            </div>
+          </div>
+
+          <div className="cp-yarn-grams">
+            <span className="cp-label" style={{ fontSize: "0.8rem" }}>
+              Grams needed
+            </span>
+            <span className="cp-hint">
+              Total yarn required to finish the project per size.
+            </span>
+            <div className="cp-yarn-grams__row">
+              {sizes.length > 0 ? (
+                sizes.map((size, si) => (
+                  <div key={si} className="cp-yarn-grams__cell">
+                    <span className="cp-yarn-grams__pill">{size}</span>
+                    <input
+                      id={`yarn-${i}-grams-${si}`}
+                      type="number"
+                      min="0"
+                      step="any"
+                      className="form-control form-control-sm cp-yarn-grams__input"
+                      value={yarn.grams_needed[si] ?? ""}
+                      onChange={(e) =>
+                        onYarnGramsNeededChange(i, si, e.target.value)
+                      }
+                      placeholder="g"
+                      aria-label={`Grams needed — ${size}`}
+                    />
+                  </div>
+                ))
+              ) : (
+                <input
+                  id={`yarn-${i}-grams-0`}
+                  type="number"
+                  min="0"
+                  step="any"
+                  className="form-control form-control-sm cp-yarn-grams__input"
+                  value={yarn.grams_needed[0] ?? ""}
+                  onChange={(e) =>
+                    onYarnGramsNeededChange(i, 0, e.target.value)
+                  }
+                  placeholder="g"
+                  aria-label="Grams needed"
+                />
+              )}
             </div>
           </div>
         </div>

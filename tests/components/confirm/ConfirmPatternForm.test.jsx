@@ -22,7 +22,7 @@ const INITIAL_DATA_RICH_YARN = {
       yarn_weight: "DK",
       meters_per_unit: 200,
       grams_per_unit: 100,
-      grams_needed: 300,
+      grams_needed: [300, 400],
       strands: 3,
     },
   ],
@@ -74,21 +74,21 @@ describe("ConfirmPatternForm", () => {
     );
 
     // Initial sizes from initialData are rendered
-    expect(screen.getByText("XS")).toBeInTheDocument();
-    expect(screen.getByText("S")).toBeInTheDocument();
+    expect(screen.getByLabelText("Remove size XS")).toBeInTheDocument();
+    expect(screen.getByLabelText("Remove size S")).toBeInTheDocument();
 
     // Add a new size
     fireEvent.change(screen.getByLabelText("New size"), {
       target: { value: "M" },
     });
     fireEvent.click(screen.getByRole("button", { name: "Add size" }));
-    expect(screen.getByText("M")).toBeInTheDocument();
+    expect(screen.getByLabelText("Remove size M")).toBeInTheDocument();
 
     // Remove the XS size
     fireEvent.click(screen.getByLabelText("Remove size XS"));
-    expect(screen.queryByText("XS")).not.toBeInTheDocument();
-    expect(screen.getByText("S")).toBeInTheDocument();
-    expect(screen.getByText("M")).toBeInTheDocument();
+    expect(screen.queryByLabelText("Remove size XS")).not.toBeInTheDocument();
+    expect(screen.getByLabelText("Remove size S")).toBeInTheDocument();
+    expect(screen.getByLabelText("Remove size M")).toBeInTheDocument();
   });
 
   it("can add and remove yarns", () => {
@@ -227,7 +227,7 @@ describe("ConfirmPatternForm", () => {
     fireEvent.change(sizeInput, { target: { value: "XXL" } });
     fireEvent.keyDown(sizeInput, { key: "Enter" });
 
-    expect(screen.getByText("XXL")).toBeInTheDocument();
+    expect(screen.getByLabelText("Remove size XXL")).toBeInTheDocument();
   });
 
   it("does not add an empty size when Add size is clicked with no input", () => {
@@ -425,7 +425,7 @@ describe("ConfirmPatternForm", () => {
     const yarn = onSubmit.mock.calls[0][0].yarns[0];
     expect(yarn.meters_per_unit).toBe("250");
     expect(yarn.grams_per_unit).toBe("120");
-    expect(yarn.grams_needed).toBe("350");
+    expect(yarn.grams_needed).toEqual(["350", "400"]);
     expect(yarn.strands).toBe(2);
   });
 
@@ -580,11 +580,11 @@ describe("ConfirmPatternForm", () => {
       />,
     );
 
-    expect(screen.getByText("XS")).toBeInTheDocument();
+    expect(screen.getByLabelText("Remove size XS")).toBeInTheDocument();
 
     fireEvent.click(screen.getByLabelText("This pattern is one size"));
 
-    expect(screen.queryByText("XS")).not.toBeInTheDocument();
+    expect(screen.queryByLabelText("Remove size XS")).not.toBeInTheDocument();
     expect(screen.getByText("One size")).toBeInTheDocument();
 
     fireEvent.click(getConfirmButton());

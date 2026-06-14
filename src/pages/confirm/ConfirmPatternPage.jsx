@@ -36,7 +36,14 @@ function ConfirmPatternPage() {
       if (data.gauge_unit) fd.append("gauge_unit", data.gauge_unit);
       if (data.needle_size) fd.append("needle_size", data.needle_size);
       fd.append("sizes", JSON.stringify(data.sizes));
-      fd.append("yarns", JSON.stringify(data.yarns));
+      const yarnsPayload = data.yarns.map((y) => {
+        const hasValue = y.grams_needed?.some((v) => v !== "" && v != null);
+        return {
+          ...y,
+          grams_needed: hasValue ? y.grams_needed : null,
+        };
+      });
+      fd.append("yarns", JSON.stringify(yarnsPayload));
       if (data.coverImage) fd.append("cover_image", data.coverImage);
 
       await confirmPattern(id, fd);

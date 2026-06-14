@@ -22,6 +22,14 @@ vi.mock("../../../src/components/pattern/AdaptPatternModal", () => ({
   ),
 }));
 
+vi.mock("../../../src/components/pattern/YarnCalculatorModal", () => ({
+  default: ({ onClose }) => (
+    <div data-testid="yarn-modal">
+      <button onClick={onClose}>Close yarn modal</button>
+    </div>
+  ),
+}));
+
 const PATTERN = {
   id: "42",
   title: "Test Pattern",
@@ -74,9 +82,40 @@ async function renderPage(id = "42") {
   });
 }
 
+const CALC_RESULT = {
+  size_label: "M",
+  yarns: [
+    {
+      pattern_yarn_id: "yarn-1",
+      calculated: true,
+      weight_warning: false,
+      message: null,
+      pattern_yarn: {
+        label: "Main yarn",
+        yarn_weight: "DK",
+        meters_per_unit: 200,
+        grams_per_unit: 100,
+        strands: 1,
+        grams_needed: 200,
+      },
+      result: { grams_needed: 180, skeins_needed: 2 },
+      user_yarn: {
+        label: "Main yarn",
+        yarn_weight: "DK",
+        meters_per_unit: 200,
+        grams_per_unit: 100,
+        strands: 1,
+      },
+    },
+  ],
+};
+
 beforeEach(() => {
   patternService.getPattern.mockResolvedValue(PATTERN);
   patternService.getScaledPattern.mockResolvedValue(SCALED_DATA);
+  patternService.getYarnCalculation.mockRejectedValue(
+    new Error("Please enter your yarn data first."),
+  );
 });
 
 afterEach(() => {
@@ -401,6 +440,63 @@ describe("PatternScaledPage", () => {
     ).not.toBeInTheDocument();
   });
 
+  it("renders the Calculate yarn needed button in the prompt section", async () => {
+    await renderPage();
+
+    expect(
+      screen.getByRole("button", { name: /calculate yarn needed/i }),
+    ).toBeInTheDocument();
+  });
+
+  it("disables the prompt Calculate yarn needed button until pattern loads", async () => {
+    let resolvePattern;
+    patternService.getPattern.mockReturnValue(
+      new Promise((res) => {
+        resolvePattern = res;
+      }),
+    );
+    await act(async () => {
+      const router = createMemoryRouter(
+        [{ path: "/patterns/:id/scaled", element: <PatternScaledPage /> }],
+        { initialEntries: ["/patterns/42/scaled"] },
+      );
+      render(<RouterProvider router={router} />);
+    });
+
+    expect(
+      screen.getByRole("button", { name: /calculate yarn needed/i }),
+    ).toBeDisabled();
+
+    await act(async () => {
+      resolvePattern(PATTERN);
+    });
+
+    expect(
+      screen.getByRole("button", { name: /calculate yarn needed/i }),
+    ).not.toBeDisabled();
+  });
+
+  it("opens the yarn modal when Calculate yarn needed is clicked", async () => {
+    await renderPage();
+
+    fireEvent.click(
+      screen.getByRole("button", { name: /calculate yarn needed/i }),
+    );
+
+    expect(screen.getByTestId("yarn-modal")).toBeInTheDocument();
+  });
+
+  it("closes the yarn modal when onClose is triggered", async () => {
+    await renderPage();
+    fireEvent.click(
+      screen.getByRole("button", { name: /calculate yarn needed/i }),
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Close yarn modal" }));
+
+    expect(screen.queryByTestId("yarn-modal")).not.toBeInTheDocument();
+  });
+
   it("does not close the detail panel when clicking inside it", async () => {
     abbreviationService.getAbbreviationByCode.mockResolvedValue({
       id: "1",
@@ -511,6 +607,118 @@ describe("PatternScaledPage", () => {
       expect(abbreviationService.getAbbreviationByCode).toHaveBeenCalledWith(
         "K",
       ),
+    );
+  });
+
+  it("shows the yarn prompt section when getYarnCalculation fails", async () => {
+    await renderPage();
+
+    expect(
+      screen.getByText(
+        /add your yarn information to know how much you'll need/i,
+      ),
+    ).toBeInTheDocument();
+  });
+
+  it("does not show the yarn summary section when getYarnCalculation fails", async () => {
+    await renderPage();
+
+    expect(
+      screen.queryByRole("heading", { name: /yarn summary/i }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("shows the yarn summary section when getYarnCalculation succeeds", async () => {
+    patternService.getYarnCalculation.mockResolvedValue(CALC_RESULT);
+    await renderPage();
+
+    expect(
+      screen.getByRole("heading", { name: /yarn summary/i }),
+    ).toBeInTheDocument();
+  });
+
+  it("renders yarn result line when calculated is true", async () => {
+    patternService.getYarnCalculation.mockResolvedValue(CALC_RESULT);
+    await renderPage();
+
+    expect(screen.getByText(/~180 g/)).toBeInTheDocument();
+    expect(screen.getByText(/~180 g/).textContent).toMatch(/2 skeins/);
+  });
+
+  it("renders the message when calculated is false", async () => {
+    patternService.getYarnCalculation.mockResolvedValue({
+      yarns: [
+        {
+          calculated: false,
+          weight_warning: false,
+          message: "Not enough data to calculate.",
+          pattern_yarn: { label: "Main yarn" },
+          result: null,
+          user_yarn: null,
+        },
+      ],
+    });
+    await renderPage();
+
+    expect(
+      screen.getByText("Not enough data to calculate."),
+    ).toBeInTheDocument();
+  });
+
+  it("shows a weight warning when weight_warning is true", async () => {
+    patternService.getYarnCalculation.mockResolvedValue({
+      yarns: [
+        {
+          ...CALC_RESULT.yarns[0],
+          weight_warning: true,
+        },
+      ],
+    });
+    await renderPage();
+
+    expect(screen.getByText(/different yarn weight/i)).toBeInTheDocument();
+  });
+
+  it("does not show a weight warning when weight_warning is false", async () => {
+    patternService.getYarnCalculation.mockResolvedValue(CALC_RESULT);
+    await renderPage();
+
+    expect(
+      screen.queryByText(/different yarn weight/i),
+    ).not.toBeInTheDocument();
+  });
+
+  it("shows the Edit yarn data button in the summary section", async () => {
+    patternService.getYarnCalculation.mockResolvedValue(CALC_RESULT);
+    await renderPage();
+
+    expect(
+      screen.getByRole("button", { name: /edit yarn data/i }),
+    ).toBeInTheDocument();
+  });
+
+  it("opens the yarn modal when Edit yarn data is clicked", async () => {
+    patternService.getYarnCalculation.mockResolvedValue(CALC_RESULT);
+    await renderPage();
+
+    fireEvent.click(screen.getByRole("button", { name: /edit yarn data/i }));
+
+    expect(screen.getByTestId("yarn-modal")).toBeInTheDocument();
+  });
+
+  it("re-fetches yarn summary when the yarn modal is closed", async () => {
+    patternService.getYarnCalculation.mockResolvedValue(CALC_RESULT);
+    await renderPage();
+
+    fireEvent.click(screen.getByRole("button", { name: /edit yarn data/i }));
+    const callsBefore = patternService.getYarnCalculation.mock.calls.length;
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: "Close yarn modal" }));
+    });
+
+    expect(patternService.getYarnCalculation.mock.calls.length).toBeGreaterThan(
+      callsBefore,
     );
   });
 

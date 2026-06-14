@@ -51,22 +51,35 @@ function CrochetIcon() {
 const CRAFT_OPTIONS = ["KNITTING", "CROCHET"];
 const ALLOWED_COVER_TYPES = ["image/jpeg", "image/png", "image/webp"];
 
-const EMPTY_YARN = () => ({
+const makeEmptyYarn = (sizes) => ({
   label: "",
   yarn_weight: "",
   meters_per_unit: "",
   grams_per_unit: "",
-  grams_needed: "",
+  grams_needed: Array(Math.max(1, sizes.length)).fill(""),
   strands: 1,
 });
 
-function normalizeYarn(y) {
+function normalizeYarn(y, sizes = []) {
+  const targetLen = Math.max(1, sizes.length);
+  const raw = y.grams_needed;
+  let gramsNeeded;
+  if (Array.isArray(raw)) {
+    gramsNeeded = Array.from({ length: targetLen }, (_, i) => {
+      const v = raw[i];
+      return v != null && v !== "" ? String(v) : "";
+    });
+  } else if (sizes.length === 0 && raw != null && raw !== "") {
+    gramsNeeded = [String(raw)];
+  } else {
+    gramsNeeded = Array(targetLen).fill("");
+  }
   return {
     label: y.label ?? "",
     yarn_weight: y.yarn_weight ?? "",
     meters_per_unit: y.meters_per_unit ?? "",
     grams_per_unit: y.grams_per_unit ?? "",
-    grams_needed: y.grams_needed ?? "",
+    grams_needed: gramsNeeded,
     strands: y.strands ?? 1,
   };
 }
@@ -107,7 +120,9 @@ function ConfirmPatternForm({ initialData, onSubmit, loading, error }) {
   const [gaugeUnit, setGaugeUnit] = useState(initialData?.gauge_unit ?? "");
   const [needleSize, setNeedleSize] = useState(initialData?.needle_size ?? "");
   const [yarns, setYarns] = useState(
-    (initialData?.yarns ?? []).map(normalizeYarn),
+    (initialData?.yarns ?? []).map((y) =>
+      normalizeYarn(y, initialData?.sizes ?? []),
+    ),
   );
   const [titleError, setTitleError] = useState(null);
 
@@ -145,6 +160,7 @@ function ConfirmPatternForm({ initialData, onSubmit, loading, error }) {
     if (checked) {
       setSizes([]);
       setNewSize("");
+      setYarns((prev) => prev.map((y) => ({ ...y, grams_needed: [""] })));
     }
   };
 
@@ -152,16 +168,36 @@ function ConfirmPatternForm({ initialData, onSubmit, loading, error }) {
     const t = newSize.trim();
     if (!t) return;
     setSizes((p) => [...p, t]);
+    setYarns((prev) =>
+      prev.map((y) => ({ ...y, grams_needed: [...y.grams_needed, ""] })),
+    );
     setNewSize("");
   };
 
-  const handleRemoveSize = (i) => setSizes((p) => p.filter((_, j) => j !== i));
+  const handleRemoveSize = (i) => {
+    setSizes((p) => p.filter((_, j) => j !== i));
+    setYarns((prev) =>
+      prev.map((y) => ({
+        ...y,
+        grams_needed: y.grams_needed.filter((_, j) => j !== i),
+      })),
+    );
+  };
 
   /* ── Yarns ── */
-  const handleAddYarn = () => setYarns((p) => [...p, EMPTY_YARN()]);
+  const handleAddYarn = () => setYarns((p) => [...p, makeEmptyYarn(sizes)]);
   const handleRemoveYarn = (i) => setYarns((p) => p.filter((_, j) => j !== i));
   const handleYarnChange = (i, field, val) =>
     setYarns((p) => p.map((y, j) => (j === i ? { ...y, [field]: val } : y)));
+  const handleYarnGramsNeededChange = (yarnIdx, sizeIdx, val) =>
+    setYarns((p) =>
+      p.map((y, j) => {
+        if (j !== yarnIdx) return y;
+        const grams = [...y.grams_needed];
+        grams[sizeIdx] = val;
+        return { ...y, grams_needed: grams };
+      }),
+    );
 
   /* ── Submit ── */
   const handleSubmit = (e) => {
@@ -351,9 +387,11 @@ function ConfirmPatternForm({ initialData, onSubmit, loading, error }) {
       >
         <YarnsSection
           yarns={yarns}
+          sizes={sizes}
           onAddYarn={handleAddYarn}
           onRemoveYarn={handleRemoveYarn}
           onYarnChange={handleYarnChange}
+          onYarnGramsNeededChange={handleYarnGramsNeededChange}
         />
       </Section>
 

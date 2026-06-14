@@ -139,6 +139,15 @@ describe("AdaptPatternModal", () => {
       });
     });
 
+    it("does not crash when getScaling rejects on mount", async () => {
+      patternService.getScaling.mockRejectedValue(new Error("Network error"));
+      renderModal({ pattern: MULTI_SIZE });
+
+      await waitFor(() => {
+        expect(screen.getByText("Adapt pattern")).toBeInTheDocument();
+      });
+    });
+
     it("calls getScaling with the pattern id on mount", async () => {
       renderModal({ pattern: MULTI_SIZE });
 
@@ -194,6 +203,23 @@ describe("AdaptPatternModal", () => {
         target: { value: "10" },
       });
     }
+
+    it("calls putScaling with gauge_rows when rows field is filled with a valid integer", async () => {
+      renderModal({ pattern: ONE_SIZE });
+
+      await advanceToStep2();
+      fireEvent.change(screen.getByLabelText(/gauge rows/i), {
+        target: { value: "28" },
+      });
+      fireEvent.click(screen.getByRole("button", { name: "Confirm" }));
+
+      await waitFor(() => {
+        expect(patternService.putScaling).toHaveBeenCalledWith(
+          "42",
+          expect.objectContaining({ gauge_rows: 28 }),
+        );
+      });
+    });
 
     it("calls putScaling with size_position 0 for one-size patterns", async () => {
       const { onConfirm } = renderModal({ pattern: ONE_SIZE });
@@ -365,6 +391,27 @@ describe("AdaptPatternModal", () => {
       expect(screen.getByLabelText(/gauge stitches/i)).not.toBeDisabled();
     });
 
+    it("refills with empty gauge size and default unit when pattern has no gauge_size or gauge_unit", async () => {
+      const PARTIAL_GAUGE = {
+        id: "42",
+        sizes: [],
+        gauge_stitches: 22,
+        gauge_size: null,
+        gauge_unit: null,
+      };
+      renderModal({ pattern: PARTIAL_GAUGE });
+      await goToStep2();
+
+      fireEvent.click(screen.getByRole("radio", { name: "Enter my gauge" }));
+      fireEvent.click(screen.getByRole("radio", { name: "Use pattern gauge" }));
+
+      expect(screen.getByLabelText(/gauge size/i)).toHaveValue(null);
+      expect(screen.getByRole("button", { name: "CM" })).toHaveAttribute(
+        "aria-pressed",
+        "true",
+      );
+    });
+
     it("refills from pattern and disables inputs when switching back to 'Use pattern gauge'", async () => {
       renderModal({ pattern: GAUGED });
       await goToStep2();
@@ -527,6 +574,49 @@ describe("AdaptPatternModal", () => {
           screen.getByText("Stitches and rows must be whole numbers"),
         ).toBeInTheDocument();
       });
+    });
+
+    it("shows 'Value must be greater than zero' when gauge size is zero", async () => {
+      renderModal({ pattern: ONE_SIZE });
+      await goToStep2();
+      fireEvent.change(screen.getByLabelText(/gauge stitches/i), {
+        target: { value: "22" },
+      });
+      fireEvent.change(screen.getByLabelText(/gauge size/i), {
+        target: { value: "0" },
+      });
+
+      fireEvent.click(screen.getByRole("button", { name: "Confirm" }));
+
+      await waitFor(() => {
+        expect(
+          screen.getByText("Value must be greater than zero"),
+        ).toBeInTheDocument();
+      });
+      expect(patternService.putScaling).not.toHaveBeenCalled();
+    });
+
+    it("shows 'Value must be greater than zero' when gauge rows is zero", async () => {
+      renderModal({ pattern: ONE_SIZE });
+      await goToStep2();
+      fireEvent.change(screen.getByLabelText(/gauge stitches/i), {
+        target: { value: "22" },
+      });
+      fireEvent.change(screen.getByLabelText(/gauge size/i), {
+        target: { value: "10" },
+      });
+      fireEvent.change(screen.getByLabelText(/gauge rows/i), {
+        target: { value: "0" },
+      });
+
+      fireEvent.click(screen.getByRole("button", { name: "Confirm" }));
+
+      await waitFor(() => {
+        expect(
+          screen.getByText("Value must be greater than zero"),
+        ).toBeInTheDocument();
+      });
+      expect(patternService.putScaling).not.toHaveBeenCalled();
     });
 
     it("clears the stitch error when the stitches field changes", async () => {

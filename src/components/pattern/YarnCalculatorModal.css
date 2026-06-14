@@ -1,0 +1,405 @@
+/* ── Step indicator ── */
+.yc-steps {
+  display: flex;
+  align-items: center;
+  padding: var(--kn-spacing-4) var(--kn-spacing-6);
+  background: var(--kn-bg);
+  border-bottom: 1.5px solid var(--kn-border);
+  flex-shrink: 0;
+}
+
+.yc-step {
+  display: flex;
+  align-items: center;
+  gap: var(--kn-spacing-2);
+}
+
+.yc-step__num {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 800;
+  border: 2px solid var(--kn-border-strong);
+  color: var(--kn-text-muted);
+  background: var(--kn-surface);
+  flex-shrink: 0;
+}
+
+.yc-step--active .yc-step__num {
+  background: var(--kn-primary);
+  border-color: var(--kn-primary);
+  color: #fff;
+}
+
+.yc-step--done .yc-step__num {
+  background: var(--kn-secondary-dark);
+  border-color: var(--kn-secondary-dark);
+  color: #fff;
+}
+
+.yc-step__label {
+  font-size: var(--kn-text-sm);
+  font-weight: 600;
+  color: var(--kn-text-muted);
+}
+
+.yc-step--active .yc-step__label {
+  color: var(--kn-text-primary);
+}
+
+.yc-step--done .yc-step__label {
+  color: var(--kn-text-secondary);
+}
+
+.yc-step__line {
+  flex: 1;
+  height: 2px;
+  background: var(--kn-border);
+  margin: 0 var(--kn-spacing-3);
+}
+
+/* ── Result view ── */
+.yc-result {
+  display: flex;
+  flex-direction: column;
+  gap: var(--kn-spacing-3);
+}
+
+.yc-result__amount {
+  font-size: 1rem;
+  color: var(--kn-text-primary);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.yc-result__amount strong {
+  color: var(--kn-primary);
+  font-size: 1.15rem;
+}
+
+.yc-result__skeins {
+  color: var(--kn-text-secondary);
+  font-size: 0.9rem;
+}
+
+.yc-result__warning {
+  font-size: var(--kn-text-sm);
+  color: #856404;
+  margin: 0;
+}
+
+.yc-result__ref {
+  border-top: 1px solid var(--kn-border);
+  padding-top: var(--kn-spacing-3);
+}
+
+.yc-result__ref-title {
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--kn-text-muted);
+  margin: 0 0 var(--kn-spacing-3);
+}
+
+.yc-result__ref-list {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--kn-spacing-1) var(--kn-spacing-4);
+  margin: 0;
+}
+
+.yc-result__ref-list dt {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--kn-text-secondary);
+}
+
+.yc-result__ref-list dd {
+  font-size: 0.82rem;
+  color: var(--kn-text-primary);
+  margin: 0;
+}
+
+.yc-result__message {
+  font-size: var(--kn-text-sm);
+  color: var(--kn-text-secondary);
+  margin: 0;
+}
+
+/* ── Overlay ── */
+.yc-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--kn-spacing-4);
+}
+
+/* ── Modal box ── */
+.yc-modal {
+  background: var(--kn-surface);
+  border-radius: 20px;
+  width: 100%;
+  max-width: 660px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: var(--kn-shadow-lg);
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Header ── */
+.yc-modal__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--kn-spacing-5) var(--kn-spacing-6);
+  border-bottom: 1.5px solid var(--kn-border);
+  flex-shrink: 0;
+}
+
+.yc-modal__title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--kn-text-primary);
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+.yc-modal__close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--kn-text-muted);
+  padding: var(--kn-spacing-1);
+  display: flex;
+  align-items: center;
+  border-radius: var(--kn-radius-sm);
+  transition: color var(--kn-transition-fast);
+}
+
+.yc-modal__close:hover {
+  color: var(--kn-text-primary);
+}
+
+/* ── Body ── */
+.yc-modal__body {
+  padding: var(--kn-spacing-6);
+  flex: 1;
+  overflow-y: auto;
+}
+
+.yc-empty {
+  font-size: var(--kn-text-sm);
+  color: var(--kn-text-muted);
+  margin: 0;
+}
+
+/* ── Yarn block ── */
+.yc-block {
+  border: 1.5px solid var(--kn-border);
+  border-radius: 14px;
+  overflow: hidden;
+  margin-bottom: var(--kn-spacing-5);
+}
+
+.yc-block:last-child {
+  margin-bottom: 0;
+}
+
+.yc-block__header {
+  display: flex;
+  align-items: center;
+  gap: var(--kn-spacing-2);
+  padding: var(--kn-spacing-3) var(--kn-spacing-4);
+  background: var(--kn-bg);
+  border-bottom: 1.5px solid var(--kn-border);
+}
+
+.yc-block__num {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--kn-secondary-bg);
+  color: var(--kn-secondary-dark);
+  font-size: 0.75rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.yc-block__name {
+  font-size: var(--kn-text-sm);
+  font-weight: 700;
+  color: var(--kn-text-primary);
+}
+
+.yc-block__body {
+  padding: var(--kn-spacing-4);
+}
+
+/* ── Same yarn checkbox ── */
+.yc-same-row {
+  display: flex;
+  align-items: center;
+  gap: var(--kn-spacing-2);
+  font-size: var(--kn-text-sm);
+  font-weight: 600;
+  color: var(--kn-text-secondary);
+  cursor: pointer;
+  margin-bottom: var(--kn-spacing-4);
+  padding: var(--kn-spacing-2) var(--kn-spacing-3);
+  border-radius: var(--kn-radius-sm);
+  border: 1.5px solid var(--kn-border);
+  transition:
+    border-color var(--kn-transition-fast),
+    color var(--kn-transition-fast),
+    background var(--kn-transition-fast);
+}
+
+.yc-same-row:hover {
+  border-color: var(--kn-primary-border);
+  color: var(--kn-primary);
+}
+
+.yc-same-row--active {
+  border-color: var(--kn-primary-border);
+  background: var(--kn-primary-bg);
+  color: var(--kn-primary);
+}
+
+/* ── Comparison table ── */
+.yc-table {
+  display: flex;
+  flex-direction: column;
+}
+
+.yc-row {
+  display: grid;
+  grid-template-columns: 80px 1fr 1.4fr;
+  gap: var(--kn-spacing-3);
+  align-items: center;
+  padding: var(--kn-spacing-2) 0;
+  border-bottom: 1px solid var(--kn-border);
+}
+
+.yc-row:last-child {
+  border-bottom: none;
+}
+
+.yc-row--head {
+  border-bottom: 1.5px solid var(--kn-border);
+  padding-bottom: var(--kn-spacing-2);
+}
+
+.yc-row--head .yc-row__prop,
+.yc-row--head .yc-row__pattern,
+.yc-row--head .yc-row__user {
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--kn-text-muted);
+}
+
+.yc-row__prop label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--kn-text-secondary);
+  margin: 0;
+  cursor: pointer;
+}
+
+.yc-row__pattern {
+  font-size: 0.82rem;
+  color: var(--kn-text-primary);
+}
+
+.yc-row__user {
+  display: flex;
+  flex-direction: column;
+  gap: var(--kn-spacing-1);
+}
+
+/* ── Required marker ── */
+.yc-required {
+  color: var(--kn-primary);
+}
+
+/* ── Validation error ── */
+.yc-error {
+  font-size: var(--kn-text-xs);
+  color: #dc3545;
+  margin: 0;
+}
+
+/* ── Footer ── */
+.yc-modal__foot {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--kn-spacing-3);
+  padding: var(--kn-spacing-5) var(--kn-spacing-6);
+  border-top: 1.5px solid var(--kn-border);
+  flex-shrink: 0;
+}
+
+.yc-cancel-btn {
+  background: none;
+  border: 1.5px solid var(--kn-border);
+  color: var(--kn-text-secondary);
+  font-size: var(--kn-text-sm);
+  font-weight: 600;
+  padding: 0.55rem 1.25rem;
+  border-radius: var(--kn-radius-full);
+  cursor: pointer;
+  transition:
+    border-color var(--kn-transition-fast),
+    color var(--kn-transition-fast);
+  font-family: var(--kn-font-body);
+}
+
+.yc-cancel-btn:hover:not(:disabled) {
+  border-color: var(--kn-border-strong);
+  color: var(--kn-text-primary);
+}
+
+.yc-cancel-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.yc-confirm-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--kn-spacing-2);
+  background: var(--kn-primary);
+  color: #fff;
+  font-size: var(--kn-text-sm);
+  font-weight: 700;
+  padding: 0.55rem 1.5rem;
+  border-radius: var(--kn-radius-full);
+  border: none;
+  cursor: pointer;
+  transition: background var(--kn-transition-fast);
+  font-family: var(--kn-font-body);
+}
+
+.yc-confirm-btn:hover:not(:disabled) {
+  background: var(--kn-primary-light);
+}
+
+.yc-confirm-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
