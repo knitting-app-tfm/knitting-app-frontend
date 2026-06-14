@@ -15,6 +15,7 @@ import {
   getScaledPattern,
   getUserYarns,
   putUserYarn,
+  getYarnCalculation,
 } from "../../src/services/patternService";
 
 const API_URL = "http://localhost:8000";
@@ -460,6 +461,38 @@ describe("putUserYarn", () => {
 
     await expect(putUserYarn("42", "1", {})).rejects.toThrow(
       "Failed to save user yarn",
+    );
+  });
+});
+
+describe("getYarnCalculation", () => {
+  it("GETs /patterns/{id}/yarn-calculation and returns the result", async () => {
+    const result = {
+      yarns: [{ calculated: true, result: { grams_needed: 150 } }],
+    };
+    const fetchMock = mockFetch(result);
+    vi.stubGlobal("fetch", fetchMock);
+
+    const data = await getYarnCalculation("42");
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      `${API_URL}/patterns/42/yarn-calculation`,
+      expect.any(Object),
+    );
+    expect(data).toEqual(result);
+  });
+
+  it("throws with the detail message when the response is not ok", async () => {
+    vi.stubGlobal("fetch", mockFetch({ detail: "Pattern not found" }, false));
+
+    await expect(getYarnCalculation("42")).rejects.toThrow("Pattern not found");
+  });
+
+  it("throws a generic message when detail is not a string", async () => {
+    vi.stubGlobal("fetch", mockFetch({ detail: [{ msg: "error" }] }, false));
+
+    await expect(getYarnCalculation("42")).rejects.toThrow(
+      "Failed to calculate yarn needed",
     );
   });
 });

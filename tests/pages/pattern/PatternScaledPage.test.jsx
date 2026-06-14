@@ -140,14 +140,16 @@ describe("PatternScaledPage", () => {
     ).toBeInTheDocument();
   });
 
-  it("shows a loading spinner before the scaled data resolves", () => {
+  it("shows a loading spinner before the scaled data resolves", async () => {
     patternService.getPattern.mockReturnValue(new Promise(() => {}));
     patternService.getScaledPattern.mockReturnValue(new Promise(() => {}));
     const router = createMemoryRouter(
       [{ path: "/patterns/:id/scaled", element: <PatternScaledPage /> }],
       { initialEntries: ["/patterns/42/scaled"] },
     );
-    render(<RouterProvider router={router} />);
+    await act(async () => {
+      render(<RouterProvider router={router} />);
+    });
 
     expect(screen.getByRole("status")).toBeInTheDocument();
   });
@@ -492,7 +494,9 @@ describe("PatternScaledPage", () => {
       screen.getByRole("button", { name: /calculate yarn needed/i }),
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "Close yarn modal" }));
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: "Close yarn modal" }));
+    });
 
     expect(screen.queryByTestId("yarn-modal")).not.toBeInTheDocument();
   });

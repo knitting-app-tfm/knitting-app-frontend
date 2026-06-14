@@ -78,6 +78,18 @@ describe("ImportPdfForm", () => {
     expect(dropZone).not.toHaveClass("border-primary");
   });
 
+  it("clicking the drop zone opens the file picker", () => {
+    render(<ImportPdfForm onSubmit={vi.fn()} loading={false} />);
+
+    const fileInput = getFileInput();
+    const clickSpy = vi.spyOn(fileInput, "click").mockImplementation(() => {});
+
+    const dropZone = screen.getByText(/Drag & drop/i).closest("div");
+    fireEvent.click(dropZone);
+
+    expect(clickSpy).toHaveBeenCalledOnce();
+  });
+
   it("disables the button and shows a spinner while loading", () => {
     render(<ImportPdfForm onSubmit={vi.fn()} loading={true} />);
 

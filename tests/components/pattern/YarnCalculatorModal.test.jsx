@@ -259,6 +259,20 @@ describe("YarnCalculatorModal", () => {
     ).toBeInTheDocument();
   });
 
+  it("shows validation error when g/skein is zero", async () => {
+    await renderModal();
+    fireEvent.change(screen.getByLabelText(/m\/skein/), {
+      target: { value: "200" },
+    });
+    fireEvent.change(screen.getByLabelText(/g\/skein/), {
+      target: { value: "0" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Calculate" }));
+    expect(
+      screen.getAllByText("Value must be greater than zero").length,
+    ).toBeGreaterThan(0);
+  });
+
   it("does not call putUserYarn when validation fails", async () => {
     await renderModal();
     fireEvent.click(screen.getByRole("button", { name: "Calculate" }));
@@ -519,6 +533,222 @@ describe("YarnCalculatorModal", () => {
     const mpuInputs = screen.getAllByLabelText(/m\/skein/);
     expect(mpuInputs[0]).toBeDisabled();
     expect(mpuInputs[1]).not.toBeDisabled();
+  });
+
+  it("clicking 'Edit yarn data' on step 2 returns to step 1", async () => {
+    await renderModal(PATTERN);
+    fireEvent.change(screen.getByLabelText(/m\/skein/), {
+      target: { value: "180" },
+    });
+    fireEvent.change(screen.getByLabelText(/g\/skein/), {
+      target: { value: "90" },
+    });
+    fireEvent.change(screen.getByLabelText(/strands/i), {
+      target: { value: "1" },
+    });
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: "Calculate" }));
+    });
+
+    expect(
+      screen.getByRole("button", { name: "Edit yarn data" }),
+    ).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Edit yarn data" }));
+
+    expect(
+      screen.getByRole("button", { name: "Calculate" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Edit yarn data" }),
+    ).not.toBeInTheDocument();
+  });
+
+  // lines 23-40: fromSaved null-field branches — fields absent in saved yarn become ""
+  it("treats null meters/grams/strands in a saved yarn as empty strings", async () => {
+    patternService.getUserYarns.mockResolvedValue([
+      {
+        pattern_yarn_id: "yarn-1",
+        label: null,
+        yarn_weight: null,
+        meters_per_unit: null,
+        grams_per_unit: null,
+        strands: null,
+      },
+    ]);
+
+    await renderModal();
+
+    expect(screen.getByLabelText(/m\/skein/)).toHaveValue(null);
+    expect(screen.getByLabelText(/g\/skein/)).toHaveValue(null);
+    expect(screen.getByLabelText(/strands/i)).toHaveValue(null);
+  });
+
+  // lines 33-40: fromPattern null-field branches — "use same yarn" with an all-null pattern yarn
+  it("treats null meters/grams/strands in pattern yarn as empty strings when 'use same yarn' is checked", async () => {
+    await renderModal(PATTERN_NULL_YARN);
+    fireEvent.click(screen.getByRole("checkbox", { name: /use same yarn/i }));
+
+    expect(screen.getByLabelText(/m\/skein/)).toHaveValue(null);
+    expect(screen.getByLabelText(/g\/skein/)).toHaveValue(null);
+    expect(screen.getByLabelText(/strands/i)).toHaveValue(null);
+  });
+
+  // line 67: strands <= 0 branch in validateUserYarn
+  it("shows 'Value must be greater than zero' when strands is zero", async () => {
+    await renderModal();
+    fireEvent.change(screen.getByLabelText(/m\/skein/), {
+      target: { value: "200" },
+    });
+    fireEvent.change(screen.getByLabelText(/g\/skein/), {
+      target: { value: "100" },
+    });
+    fireEvent.change(screen.getByLabelText(/strands/i), {
+      target: { value: "0" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Calculate" }));
+    expect(
+      screen.getAllByText("Value must be greater than zero").length,
+    ).toBeGreaterThan(0);
+  });
+
+  // line 182: Array.isArray(raw) branch — getYarnCalculation returns an array directly
+  it("handles getYarnCalculation returning an array directly", async () => {
+    patternService.getYarnCalculation.mockResolvedValue([
+      {
+        calculated: true,
+        weight_warning: false,
+        pattern_yarn: { label: "Main yarn" },
+        result: { grams_needed: 180, skeins_needed: 2 },
+      },
+    ]);
+    await renderModal();
+    fireEvent.change(screen.getByLabelText(/m\/skein/), {
+      target: { value: "200" },
+    });
+    fireEvent.change(screen.getByLabelText(/g\/skein/), {
+      target: { value: "100" },
+    });
+    fireEvent.change(screen.getByLabelText(/strands/i), {
+      target: { value: "1" },
+    });
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: "Calculate" }));
+    });
+    expect(screen.getByText(/approximately/i)).toBeInTheDocument();
+  });
+
+  // line 182: raw.yarns ?? [raw] — getYarnCalculation returns a single object without .yarns
+  it("wraps a bare result object in an array when yarns key is absent", async () => {
+    patternService.getYarnCalculation.mockResolvedValue({
+      calculated: true,
+      weight_warning: false,
+      pattern_yarn: { label: "Main yarn" },
+      result: { grams_needed: 200 },
+    });
+    await renderModal();
+    fireEvent.change(screen.getByLabelText(/m\/skein/), {
+      target: { value: "200" },
+    });
+    fireEvent.change(screen.getByLabelText(/g\/skein/), {
+      target: { value: "100" },
+    });
+    fireEvent.change(screen.getByLabelText(/strands/i), {
+      target: { value: "1" },
+    });
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: "Calculate" }));
+    });
+    expect(screen.getByText(/approximately/i)).toBeInTheDocument();
+  });
+
+  // line 451: result.pattern_yarn ?? {} — null pattern_yarn falls back to patternYarns label
+  it("falls back to the pattern yarn label when result.pattern_yarn is null", async () => {
+    patternService.getYarnCalculation.mockResolvedValue({
+      yarns: [
+        {
+          calculated: true,
+          weight_warning: false,
+          pattern_yarn: null,
+          result: { grams_needed: 180, skeins_needed: 1 },
+        },
+      ],
+    });
+    await renderModal(PATTERN);
+    fireEvent.change(screen.getByLabelText(/m\/skein/), {
+      target: { value: "200" },
+    });
+    fireEvent.change(screen.getByLabelText(/g\/skein/), {
+      target: { value: "100" },
+    });
+    fireEvent.change(screen.getByLabelText(/strands/i), {
+      target: { value: "1" },
+    });
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: "Calculate" }));
+    });
+    expect(document.querySelector(".yc-block__name")).toHaveTextContent(
+      "Main yarn",
+    );
+  });
+
+  // line 461: result.calculated === false branch shows message instead of result
+  it("shows the result message when calculated is false", async () => {
+    patternService.getYarnCalculation.mockResolvedValue({
+      yarns: [
+        {
+          calculated: false,
+          message: "Not enough yarn data to calculate",
+          pattern_yarn: { label: "Main yarn" },
+          result: null,
+        },
+      ],
+    });
+    await renderModal(PATTERN);
+    fireEvent.change(screen.getByLabelText(/m\/skein/), {
+      target: { value: "200" },
+    });
+    fireEvent.change(screen.getByLabelText(/g\/skein/), {
+      target: { value: "100" },
+    });
+    fireEvent.change(screen.getByLabelText(/strands/i), {
+      target: { value: "1" },
+    });
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: "Calculate" }));
+    });
+    expect(
+      screen.getByText("Not enough yarn data to calculate"),
+    ).toBeInTheDocument();
+  });
+
+  // line 475: weight_warning true branch shows the warning paragraph
+  it("shows the weight warning when result.weight_warning is true", async () => {
+    patternService.getYarnCalculation.mockResolvedValue({
+      yarns: [
+        {
+          ...CALC_RESULT.yarns[0],
+          weight_warning: true,
+        },
+      ],
+    });
+    await renderModal(PATTERN);
+    fireEvent.change(screen.getByLabelText(/m\/skein/), {
+      target: { value: "200" },
+    });
+    fireEvent.change(screen.getByLabelText(/g\/skein/), {
+      target: { value: "100" },
+    });
+    fireEvent.change(screen.getByLabelText(/strands/i), {
+      target: { value: "1" },
+    });
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: "Calculate" }));
+    });
+    expect(
+      screen.getByText(/different weight than the pattern/i),
+    ).toBeInTheDocument();
   });
 
   it("shows the Calculating… spinner while the request is pending", async () => {
