@@ -615,6 +615,34 @@ describe("ConfirmPatternForm", () => {
     expect(revokeObjectURL).toHaveBeenCalled();
   });
 
+  it("normalizes a scalar grams_needed into a single-element array when sizes is empty", () => {
+    const onSubmit = vi.fn();
+    render(
+      <ConfirmPatternForm
+        initialData={{
+          title: "Scalar Test",
+          craft: "KNITTING",
+          sizes: [],
+          yarns: [
+            {
+              label: "Yarn A",
+              yarn_weight: "DK",
+              strands: 1,
+              grams_needed: 300,
+            },
+          ],
+        }}
+        onSubmit={onSubmit}
+        loading={false}
+        error={null}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Confirm" }));
+
+    expect(onSubmit.mock.calls[0][0].yarns[0].grams_needed).toEqual(["300"]);
+  });
+
   it("changes craft via the visual radio toggle", () => {
     const onSubmit = vi.fn();
     render(
