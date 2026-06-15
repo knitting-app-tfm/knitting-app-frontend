@@ -13,26 +13,43 @@ function buildStyle(bold, italic, fontSize) {
   return style;
 }
 
-function TokenRenderer({ token, onAbbreviationClick, bold, italic, fontSize }) {
+function TokenRenderer({
+  token,
+  onAbbreviationClick,
+  bold,
+  italic,
+  fontSize,
+  scaled,
+}) {
   const style = buildStyle(bold, italic, fontSize);
+  const scaledClass = scaled ? " tr-token--scaled" : "";
 
   if (token.type === "text") {
-    return <span style={style}>{token.value}</span>;
+    return (
+      <span className={scaledClass || undefined} style={style}>
+        {token.value}
+      </span>
+    );
   }
 
   if (token.type === "number") {
     const text = token.unit
       ? `${token.value} ${token.unit}`
       : String(token.value);
-    return <span style={style}>{text}</span>;
+    return (
+      <span className={scaledClass || undefined} style={style}>
+        {text}
+      </span>
+    );
   }
 
   if (token.type === "size_group") {
-    const text = token.values
+    const values = token.values
       .map((v, i) => (i === 0 ? String(v) : `(${v})`))
       .join(" ");
+    const text = token.unit ? `${values} ${token.unit}` : values;
     return (
-      <span className="tr-size-group" style={style}>
+      <span className={`tr-size-group${scaledClass}`} style={style}>
         {text}
       </span>
     );
@@ -42,7 +59,7 @@ function TokenRenderer({ token, onAbbreviationClick, bold, italic, fontSize }) {
     if (token.translated) {
       return (
         <span
-          className="tr-abbr tr-abbr--translated"
+          className={`tr-abbr tr-abbr--translated${scaledClass}`}
           style={style}
           onClick={() => onAbbreviationClick?.(token)}
         >
@@ -51,7 +68,10 @@ function TokenRenderer({ token, onAbbreviationClick, bold, italic, fontSize }) {
       );
     }
     return (
-      <span className="tr-abbr tr-abbr--untranslated" style={style}>
+      <span
+        className={`tr-abbr tr-abbr--untranslated${scaledClass}`}
+        style={style}
+      >
         {token.code}
       </span>
     );

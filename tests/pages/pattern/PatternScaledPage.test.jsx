@@ -1,0 +1,748 @@
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import {
+  render,
+  screen,
+  fireEvent,
+  waitFor,
+  act,
+} from "@testing-library/react";
+import { createMemoryRouter, RouterProvider } from "react-router-dom";
+import PatternScaledPage from "../../../src/pages/pattern/PatternScaledPage";
+import * as abbreviationService from "../../../src/services/abbreviationService";
+import * as patternService from "../../../src/services/patternService";
+
+vi.mock("../../../src/services/patternService");
+vi.mock("../../../src/services/abbreviationService");
+vi.mock("../../../src/components/pattern/AdaptPatternModal", () => ({
+  default: ({ onClose, onConfirm }) => (
+    <div data-testid="adapt-modal">
+      <button onClick={onClose}>Close modal</button>
+      <button onClick={onConfirm}>Confirm modal</button>
+    </div>
+  ),
+}));
+
+vi.mock("../../../src/components/pattern/YarnCalculatorModal", () => ({
+  default: ({ onClose }) => (
+    <div data-testid="yarn-modal">
+      <button onClick={onClose}>Close yarn modal</button>
+    </div>
+  ),
+}));
+
+const PATTERN = {
+  id: "42",
+  title: "Test Pattern",
+  status: "TOKENIZED",
+  sizes: ["S", "M", "L"],
+  gauge_stitches: 22,
+  gauge_size: 10,
+  gauge_unit: "CM",
+};
+
+const SCALED_DATA = {
+  size_label: "M",
+  rows_warning: false,
+  lines: [
+    {
+      line: 1,
+      tokens: [
+        { type: "text", value: "Cast on", scaled: false },
+        { type: "number", value: 22, unit: null, scaled: true },
+        {
+          type: "abbreviation",
+          code: "sts",
+          translated: true,
+          full_name: "stitches",
+          quantity: null,
+          scaled: false,
+        },
+      ],
+      bold: false,
+      italic: false,
+      font_size: null,
+    },
+    { line: 2, tokens: [] },
+  ],
+};
+
+async function renderPage(id = "42") {
+  const router = createMemoryRouter(
+    [
+      { path: "/patterns/:id/scaled", element: <PatternScaledPage /> },
+      {
+        path: "/patterns/:id/translation",
+        element: <div>Translation page</div>,
+      },
+    ],
+    { initialEntries: [`/patterns/${id}/scaled`] },
+  );
+  await act(async () => {
+    render(<RouterProvider router={router} />);
+  });
+}
+
+const CALC_RESULT = {
+  size_label: "M",
+  yarns: [
+    {
+      pattern_yarn_id: "yarn-1",
+      calculated: true,
+      weight_warning: false,
+      message: null,
+      pattern_yarn: {
+        label: "Main yarn",
+        yarn_weight: "DK",
+        meters_per_unit: 200,
+        grams_per_unit: 100,
+        strands: 1,
+        grams_needed: 200,
+      },
+      result: { grams_needed: 180, skeins_needed: 2 },
+      user_yarn: {
+        label: "Main yarn",
+        yarn_weight: "DK",
+        meters_per_unit: 200,
+        grams_per_unit: 100,
+        strands: 1,
+      },
+    },
+  ],
+};
+
+beforeEach(() => {
+  patternService.getPattern.mockResolvedValue(PATTERN);
+  patternService.getScaledPattern.mockResolvedValue(SCALED_DATA);
+  patternService.getYarnCalculation.mockRejectedValue(
+    new Error("Please enter your yarn data first."),
+  );
+});
+
+afterEach(() => {
+  vi.clearAllMocks();
+});
+
+describe("PatternScaledPage", () => {
+  it("renders a breadcrumb link back to the pattern detail page", async () => {
+    await renderPage("42");
+
+    expect(screen.getByRole("link", { name: "Pattern" })).toHaveAttribute(
+      "href",
+      "/patterns/42",
+    );
+  });
+
+  it("renders the Pattern Scaled heading", async () => {
+    await renderPage();
+
+    expect(
+      screen.getByRole("heading", { name: "Pattern Scaled" }),
+    ).toBeInTheDocument();
+  });
+
+  it("shows a loading spinner before the scaled data resolves", async () => {
+    patternService.getPattern.mockReturnValue(new Promise(() => {}));
+    patternService.getScaledPattern.mockReturnValue(new Promise(() => {}));
+    const router = createMemoryRouter(
+      [{ path: "/patterns/:id/scaled", element: <PatternScaledPage /> }],
+      { initialEntries: ["/patterns/42/scaled"] },
+    );
+    await act(async () => {
+      render(<RouterProvider router={router} />);
+    });
+
+    expect(screen.getByRole("status")).toBeInTheDocument();
+  });
+
+  it("shows an error alert when getScaledPattern fails", async () => {
+    patternService.getScaledPattern.mockRejectedValue(
+      new Error("Failed to load scaled pattern"),
+    );
+    await renderPage();
+
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      "Failed to load scaled pattern",
+    );
+  });
+
+  it("renders text tokens", async () => {
+    await renderPage();
+
+    expect(screen.getByText("Cast on")).toBeInTheDocument();
+  });
+
+  it("renders a blank line as pt-line--blank", async () => {
+    await renderPage();
+
+    expect(document.querySelector(".pt-line--blank")).toBeInTheDocument();
+  });
+
+  it("wraps scaled tokens with tr-token--scaled class", async () => {
+    await renderPage();
+
+    expect(
+      document.querySelectorAll(".tr-token--scaled").length,
+    ).toBeGreaterThan(0);
+  });
+
+  it("does not apply tr-token--scaled class to non-scaled tokens", async () => {
+    await renderPage();
+
+    const castOn = screen.getByText("Cast on");
+    expect(castOn.className).toBeFalsy();
+  });
+
+  it("shows the rows_warning banner when rows_warning is true", async () => {
+    patternService.getScaledPattern.mockResolvedValue({
+      ...SCALED_DATA,
+      rows_warning: true,
+    });
+    await renderPage();
+
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      "Row gauge was not provided",
+    );
+  });
+
+  it("does not show the rows_warning banner when rows_warning is false", async () => {
+    await renderPage();
+
+    expect(
+      screen.queryByText(/row gauge was not provided/i),
+    ).not.toBeInTheDocument();
+  });
+
+  it("shows the size label when size_label is present", async () => {
+    await renderPage();
+
+    expect(screen.getByText("Viewing pattern for size M")).toBeInTheDocument();
+  });
+
+  it("does not show the size label when size_label is absent", async () => {
+    patternService.getScaledPattern.mockResolvedValue({
+      ...SCALED_DATA,
+      size_label: null,
+    });
+    await renderPage();
+
+    expect(
+      screen.queryByText(/viewing pattern for size/i),
+    ).not.toBeInTheDocument();
+  });
+
+  it("renders the Scaled toggle as active and disabled", async () => {
+    await renderPage();
+
+    expect(screen.getByRole("button", { name: "Scaled" })).toBeDisabled();
+  });
+
+  it("renders the Translated toggle as an enabled button", async () => {
+    await renderPage();
+
+    expect(
+      screen.getByRole("button", { name: "Translated" }),
+    ).not.toBeDisabled();
+  });
+
+  it("shows Loading… on the Translated toggle while translatePattern is in-flight", async () => {
+    patternService.translatePattern.mockReturnValue(new Promise(() => {}));
+    await renderPage();
+
+    fireEvent.click(screen.getByRole("button", { name: "Translated" }));
+
+    expect(screen.getByRole("button", { name: "Loading…" })).toBeDisabled();
+  });
+
+  it("navigates to the translation page with tokens after translatePattern resolves", async () => {
+    patternService.translatePattern.mockResolvedValue([
+      { line: 1, tokens: [] },
+    ]);
+    await renderPage();
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: "Translated" }));
+    });
+
+    expect(screen.getByText("Translation page")).toBeInTheDocument();
+  });
+
+  it("re-enables the Translated toggle when translatePattern fails", async () => {
+    patternService.translatePattern.mockRejectedValue(
+      new Error("Translation failed"),
+    );
+    await renderPage();
+    fireEvent.click(screen.getByRole("button", { name: "Translated" }));
+
+    await waitFor(() =>
+      expect(
+        screen.getByRole("button", { name: "Translated" }),
+      ).not.toBeDisabled(),
+    );
+  });
+
+  it("disables the Edit adaptation button until pattern loads", async () => {
+    let resolvePattern;
+    patternService.getPattern.mockReturnValue(
+      new Promise((res) => {
+        resolvePattern = res;
+      }),
+    );
+    const router = createMemoryRouter(
+      [{ path: "/patterns/:id/scaled", element: <PatternScaledPage /> }],
+      { initialEntries: ["/patterns/42/scaled"] },
+    );
+    render(<RouterProvider router={router} />);
+
+    expect(
+      screen.getByRole("button", { name: /edit adaptation/i }),
+    ).toBeDisabled();
+
+    await act(async () => {
+      resolvePattern(PATTERN);
+    });
+
+    expect(
+      screen.getByRole("button", { name: /edit adaptation/i }),
+    ).not.toBeDisabled();
+  });
+
+  it("opens the adapt modal when Edit adaptation is clicked", async () => {
+    await renderPage();
+
+    fireEvent.click(screen.getByRole("button", { name: /edit adaptation/i }));
+
+    expect(screen.getByTestId("adapt-modal")).toBeInTheDocument();
+  });
+
+  it("closes the adapt modal when onClose is triggered", async () => {
+    await renderPage();
+    fireEvent.click(screen.getByRole("button", { name: /edit adaptation/i }));
+
+    fireEvent.click(screen.getByRole("button", { name: "Close modal" }));
+
+    expect(screen.queryByTestId("adapt-modal")).not.toBeInTheDocument();
+  });
+
+  it("closes the modal and re-fetches scaled data when onConfirm is triggered", async () => {
+    const updatedData = { ...SCALED_DATA, size_label: "L" };
+    patternService.getScaledPattern
+      .mockResolvedValueOnce(SCALED_DATA)
+      .mockResolvedValueOnce(updatedData);
+    await renderPage();
+    fireEvent.click(screen.getByRole("button", { name: /edit adaptation/i }));
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: "Confirm modal" }));
+    });
+
+    expect(screen.queryByTestId("adapt-modal")).not.toBeInTheDocument();
+    expect(patternService.getScaledPattern).toHaveBeenCalledTimes(2);
+    await waitFor(() =>
+      expect(
+        screen.getByText("Viewing pattern for size L"),
+      ).toBeInTheDocument(),
+    );
+  });
+
+  it("shows an error alert when re-fetching after modal confirm fails", async () => {
+    patternService.getScaledPattern
+      .mockResolvedValueOnce(SCALED_DATA)
+      .mockRejectedValueOnce(new Error("Reload failed"));
+    await renderPage();
+    fireEvent.click(screen.getByRole("button", { name: /edit adaptation/i }));
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: "Confirm modal" }));
+    });
+
+    expect(await screen.findByRole("alert")).toHaveTextContent("Reload failed");
+  });
+
+  it("opens the detail panel with a spinner when a translated abbreviation is clicked", async () => {
+    abbreviationService.getAbbreviationByCode.mockReturnValue(
+      new Promise(() => {}),
+    );
+    await renderPage();
+    fireEvent.click(screen.getByText("stitches"));
+
+    expect(document.querySelector(".pt-detail-col--open")).toBeInTheDocument();
+    expect(document.querySelector(".pt-detail-loading")).toBeInTheDocument();
+  });
+
+  it("shows abbreviation detail after a successful load", async () => {
+    abbreviationService.getAbbreviationByCode.mockResolvedValue({
+      id: "1",
+      abbreviation: "sts",
+      full_name: "stitches",
+      craft: "KNITTING",
+      type: "STITCH",
+      description: "A basic knitting stitch",
+      video_link: null,
+    });
+    await renderPage();
+    fireEvent.click(screen.getByText("stitches"));
+
+    await waitFor(() =>
+      expect(screen.getByText("A basic knitting stitch")).toBeInTheDocument(),
+    );
+  });
+
+  it("shows an error alert in the panel when abbreviation load fails", async () => {
+    abbreviationService.getAbbreviationByCode.mockRejectedValue(
+      new Error("Not found"),
+    );
+    await renderPage();
+    fireEvent.click(screen.getByText("stitches"));
+
+    expect(await screen.findByText("Not found")).toBeInTheDocument();
+  });
+
+  it("closes the detail panel when the close button is clicked", async () => {
+    abbreviationService.getAbbreviationByCode.mockResolvedValue({
+      id: "1",
+      abbreviation: "sts",
+      full_name: "stitches",
+      craft: "KNITTING",
+      type: "STITCH",
+      description: "A basic knitting stitch",
+      video_link: null,
+    });
+    await renderPage();
+    fireEvent.click(screen.getByText("stitches"));
+    await screen.findByText("A basic knitting stitch");
+
+    fireEvent.click(screen.getByRole("button", { name: "Close detail" }));
+
+    expect(
+      screen.queryByText("A basic knitting stitch"),
+    ).not.toBeInTheDocument();
+    expect(
+      document.querySelector(".pt-detail-col--open"),
+    ).not.toBeInTheDocument();
+  });
+
+  it("closes the detail panel when clicking outside it", async () => {
+    abbreviationService.getAbbreviationByCode.mockResolvedValue({
+      id: "1",
+      abbreviation: "sts",
+      full_name: "stitches",
+      craft: "KNITTING",
+      type: "STITCH",
+      description: "A basic knitting stitch",
+      video_link: null,
+    });
+    await renderPage();
+    fireEvent.click(screen.getByText("stitches"));
+    await screen.findByText("A basic knitting stitch");
+
+    fireEvent.mouseDown(screen.getByText("Cast on"));
+
+    expect(
+      screen.queryByText("A basic knitting stitch"),
+    ).not.toBeInTheDocument();
+  });
+
+  it("renders the Calculate yarn needed button in the prompt section", async () => {
+    await renderPage();
+
+    expect(
+      screen.getByRole("button", { name: /calculate yarn needed/i }),
+    ).toBeInTheDocument();
+  });
+
+  it("disables the prompt Calculate yarn needed button until pattern loads", async () => {
+    let resolvePattern;
+    patternService.getPattern.mockReturnValue(
+      new Promise((res) => {
+        resolvePattern = res;
+      }),
+    );
+    await act(async () => {
+      const router = createMemoryRouter(
+        [{ path: "/patterns/:id/scaled", element: <PatternScaledPage /> }],
+        { initialEntries: ["/patterns/42/scaled"] },
+      );
+      render(<RouterProvider router={router} />);
+    });
+
+    expect(
+      screen.getByRole("button", { name: /calculate yarn needed/i }),
+    ).toBeDisabled();
+
+    await act(async () => {
+      resolvePattern(PATTERN);
+    });
+
+    expect(
+      screen.getByRole("button", { name: /calculate yarn needed/i }),
+    ).not.toBeDisabled();
+  });
+
+  it("opens the yarn modal when Calculate yarn needed is clicked", async () => {
+    await renderPage();
+
+    fireEvent.click(
+      screen.getByRole("button", { name: /calculate yarn needed/i }),
+    );
+
+    expect(screen.getByTestId("yarn-modal")).toBeInTheDocument();
+  });
+
+  it("closes the yarn modal when onClose is triggered", async () => {
+    await renderPage();
+    fireEvent.click(
+      screen.getByRole("button", { name: /calculate yarn needed/i }),
+    );
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: "Close yarn modal" }));
+    });
+
+    expect(screen.queryByTestId("yarn-modal")).not.toBeInTheDocument();
+  });
+
+  it("does not close the detail panel when clicking inside it", async () => {
+    abbreviationService.getAbbreviationByCode.mockResolvedValue({
+      id: "1",
+      abbreviation: "sts",
+      full_name: "stitches",
+      craft: "KNITTING",
+      type: "STITCH",
+      description: "A basic knitting stitch",
+      video_link: null,
+    });
+    await renderPage();
+    fireEvent.click(screen.getByText("stitches"));
+    await screen.findByText("A basic knitting stitch");
+
+    fireEvent.mouseDown(screen.getByText("A basic knitting stitch"));
+
+    expect(screen.getByText("A basic knitting stitch")).toBeInTheDocument();
+    expect(document.querySelector(".pt-detail-col--open")).toBeInTheDocument();
+  });
+
+  it("discards a successful fetch result when the request was cancelled", async () => {
+    let resolveAbbr;
+    abbreviationService.getAbbreviationByCode.mockReturnValue(
+      new Promise((res) => {
+        resolveAbbr = res;
+      }),
+    );
+    await renderPage();
+    fireEvent.click(screen.getByText("stitches"));
+    fireEvent.mouseDown(screen.getByText("Cast on"));
+
+    await act(async () => {
+      resolveAbbr({
+        id: "1",
+        abbreviation: "sts",
+        full_name: "stitches",
+        craft: "KNITTING",
+        type: "STITCH",
+        description: "A basic knitting stitch",
+        video_link: null,
+      });
+    });
+
+    expect(
+      screen.queryByText("A basic knitting stitch"),
+    ).not.toBeInTheDocument();
+    expect(
+      document.querySelector(".pt-detail-col--open"),
+    ).not.toBeInTheDocument();
+  });
+
+  it("discards a failed fetch result when the request was cancelled", async () => {
+    let rejectAbbr;
+    abbreviationService.getAbbreviationByCode.mockReturnValue(
+      new Promise((_, rej) => {
+        rejectAbbr = rej;
+      }),
+    );
+    await renderPage();
+    fireEvent.click(screen.getByText("stitches"));
+    fireEvent.mouseDown(screen.getByText("Cast on"));
+
+    await act(async () => {
+      rejectAbbr(new Error("Not found"));
+    });
+
+    expect(screen.queryByText("Not found")).not.toBeInTheDocument();
+    expect(
+      document.querySelector(".pt-detail-col--open"),
+    ).not.toBeInTheDocument();
+  });
+
+  it("looks up the base code when quantity is not null (e.g. K23 → K)", async () => {
+    abbreviationService.getAbbreviationByCode.mockResolvedValue({
+      id: "2",
+      abbreviation: "K",
+      full_name: "knit",
+      craft: "KNITTING",
+      type: "STITCH",
+      description: "Knit stitch",
+      video_link: null,
+    });
+    patternService.getScaledPattern.mockResolvedValue({
+      ...SCALED_DATA,
+      lines: [
+        {
+          line: 1,
+          tokens: [
+            {
+              type: "abbreviation",
+              code: "K23",
+              translated: true,
+              full_name: "knit",
+              quantity: 23,
+              scaled: false,
+            },
+          ],
+          bold: false,
+          italic: false,
+          font_size: null,
+        },
+      ],
+    });
+    await renderPage();
+    fireEvent.click(screen.getByText("knit"));
+
+    await waitFor(() =>
+      expect(abbreviationService.getAbbreviationByCode).toHaveBeenCalledWith(
+        "K",
+      ),
+    );
+  });
+
+  it("shows the yarn prompt section when getYarnCalculation fails", async () => {
+    await renderPage();
+
+    expect(
+      screen.getByText(
+        /add your yarn information to know how much you'll need/i,
+      ),
+    ).toBeInTheDocument();
+  });
+
+  it("does not show the yarn summary section when getYarnCalculation fails", async () => {
+    await renderPage();
+
+    expect(
+      screen.queryByRole("heading", { name: /yarn summary/i }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("shows the yarn summary section when getYarnCalculation succeeds", async () => {
+    patternService.getYarnCalculation.mockResolvedValue(CALC_RESULT);
+    await renderPage();
+
+    expect(
+      screen.getByRole("heading", { name: /yarn summary/i }),
+    ).toBeInTheDocument();
+  });
+
+  it("renders yarn result line when calculated is true", async () => {
+    patternService.getYarnCalculation.mockResolvedValue(CALC_RESULT);
+    await renderPage();
+
+    expect(screen.getByText(/~180 g/)).toBeInTheDocument();
+    expect(screen.getByText(/~180 g/).textContent).toMatch(/2 skeins/);
+  });
+
+  it("renders the message when calculated is false", async () => {
+    patternService.getYarnCalculation.mockResolvedValue({
+      yarns: [
+        {
+          calculated: false,
+          weight_warning: false,
+          message: "Not enough data to calculate.",
+          pattern_yarn: { label: "Main yarn" },
+          result: null,
+          user_yarn: null,
+        },
+      ],
+    });
+    await renderPage();
+
+    expect(
+      screen.getByText("Not enough data to calculate."),
+    ).toBeInTheDocument();
+  });
+
+  it("shows a weight warning when weight_warning is true", async () => {
+    patternService.getYarnCalculation.mockResolvedValue({
+      yarns: [
+        {
+          ...CALC_RESULT.yarns[0],
+          weight_warning: true,
+        },
+      ],
+    });
+    await renderPage();
+
+    expect(screen.getByText(/different yarn weight/i)).toBeInTheDocument();
+  });
+
+  it("does not show a weight warning when weight_warning is false", async () => {
+    patternService.getYarnCalculation.mockResolvedValue(CALC_RESULT);
+    await renderPage();
+
+    expect(
+      screen.queryByText(/different yarn weight/i),
+    ).not.toBeInTheDocument();
+  });
+
+  it("shows the Edit yarn data button in the summary section", async () => {
+    patternService.getYarnCalculation.mockResolvedValue(CALC_RESULT);
+    await renderPage();
+
+    expect(
+      screen.getByRole("button", { name: /edit yarn data/i }),
+    ).toBeInTheDocument();
+  });
+
+  it("opens the yarn modal when Edit yarn data is clicked", async () => {
+    patternService.getYarnCalculation.mockResolvedValue(CALC_RESULT);
+    await renderPage();
+
+    fireEvent.click(screen.getByRole("button", { name: /edit yarn data/i }));
+
+    expect(screen.getByTestId("yarn-modal")).toBeInTheDocument();
+  });
+
+  it("re-fetches yarn summary when the yarn modal is closed", async () => {
+    patternService.getYarnCalculation.mockResolvedValue(CALC_RESULT);
+    await renderPage();
+
+    fireEvent.click(screen.getByRole("button", { name: /edit yarn data/i }));
+    const callsBefore = patternService.getYarnCalculation.mock.calls.length;
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: "Close yarn modal" }));
+    });
+
+    expect(patternService.getYarnCalculation.mock.calls.length).toBeGreaterThan(
+      callsBefore,
+    );
+  });
+
+  it("uses the code as-is when quantity is null", async () => {
+    abbreviationService.getAbbreviationByCode.mockResolvedValue({
+      id: "1",
+      abbreviation: "sts",
+      full_name: "stitches",
+      craft: "KNITTING",
+      type: "STITCH",
+      description: "A basic knitting stitch",
+      video_link: null,
+    });
+    await renderPage();
+    fireEvent.click(screen.getByText("stitches"));
+
+    await waitFor(() =>
+      expect(abbreviationService.getAbbreviationByCode).toHaveBeenCalledWith(
+        "sts",
+      ),
+    );
+  });
+});

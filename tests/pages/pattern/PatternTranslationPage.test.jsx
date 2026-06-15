@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, afterEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import {
   render,
   screen,
@@ -9,9 +9,18 @@ import {
 import { createMemoryRouter, RouterProvider } from "react-router-dom";
 import PatternTranslationPage from "../../../src/pages/pattern/PatternTranslationPage";
 import * as abbreviationService from "../../../src/services/abbreviationService";
+import * as patternService from "../../../src/services/patternService";
 
 vi.mock("../../../src/services/patternService");
 vi.mock("../../../src/services/abbreviationService");
+vi.mock("../../../src/components/pattern/AdaptPatternModal", () => ({
+  default: ({ onClose, onConfirm }) => (
+    <div data-testid="adapt-modal">
+      <button onClick={onClose}>Close modal</button>
+      <button onClick={onConfirm}>Confirm modal</button>
+    </div>
+  ),
+}));
 
 const LINES = [
   {
@@ -49,7 +58,7 @@ const LINES = [
   },
 ];
 
-function renderPage(id = "42", state = undefined) {
+async function renderPage(id = "42", state = undefined) {
   const router = createMemoryRouter(
     [
       {
@@ -59,16 +68,28 @@ function renderPage(id = "42", state = undefined) {
     ],
     { initialEntries: [{ pathname: `/patterns/${id}/translation`, state }] },
   );
-  render(<RouterProvider router={router} />);
+  await act(async () => {
+    render(<RouterProvider router={router} />);
+  });
 }
+
+beforeEach(() => {
+  patternService.getPattern.mockResolvedValue({
+    id: "42",
+    title: "Test Pattern",
+    status: "TOKENIZED",
+    sizes: [],
+  });
+  patternService.getScaling.mockResolvedValue(null);
+});
 
 afterEach(() => {
   vi.clearAllMocks();
 });
 
 describe("PatternTranslationPage", () => {
-  it("renders a breadcrumb link back to the pattern detail page", () => {
-    renderPage("42", { tokens: [] });
+  it("renders a breadcrumb link back to the pattern detail page", async () => {
+    await renderPage("42", { tokens: [] });
 
     expect(screen.getByRole("link", { name: "Pattern" })).toHaveAttribute(
       "href",
@@ -76,58 +97,58 @@ describe("PatternTranslationPage", () => {
     );
   });
 
-  it("renders plain text tokens", () => {
-    renderPage("42", { tokens: LINES });
+  it("renders plain text tokens", async () => {
+    await renderPage("42", { tokens: LINES });
 
     expect(screen.getByText("Cast on")).toBeInTheDocument();
   });
 
-  it("renders size_group tokens as first value followed by parenthesised values", () => {
-    renderPage("42", { tokens: LINES });
+  it("renders size_group tokens as first value followed by parenthesised values", async () => {
+    await renderPage("42", { tokens: LINES });
 
-    expect(screen.getByText("147 (159) (174)")).toBeInTheDocument();
+    expect(screen.getByText("147 (159) (174) stitches")).toBeInTheDocument();
   });
 
-  it("renders a translated abbreviation using its full name with the translated class", () => {
-    renderPage("42", { tokens: LINES });
+  it("renders a translated abbreviation using its full name with the translated class", async () => {
+    await renderPage("42", { tokens: LINES });
 
     const el = screen.getByText("stitches");
     expect(el).toHaveClass("tr-abbr--translated");
   });
 
-  it("renders an untranslated abbreviation using its code with the untranslated class", () => {
-    renderPage("42", { tokens: LINES });
+  it("renders an untranslated abbreviation using its code with the untranslated class", async () => {
+    await renderPage("42", { tokens: LINES });
 
     const el = screen.getByText("CO");
     expect(el).toHaveClass("tr-abbr--untranslated");
   });
 
-  it("renders number tokens with their unit", () => {
-    renderPage("42", { tokens: LINES });
+  it("renders number tokens with their unit", async () => {
+    await renderPage("42", { tokens: LINES });
 
     expect(screen.getByText("3.5 mm")).toBeInTheDocument();
   });
 
-  it("renders an empty div for blank lines", () => {
-    renderPage("42", { tokens: LINES });
+  it("renders an empty div for blank lines", async () => {
+    await renderPage("42", { tokens: LINES });
 
     const blankLines = document.querySelectorAll(".pt-line--blank");
     expect(blankLines.length).toBe(1);
   });
 
-  it("renders an empty pattern area when no state is provided", () => {
-    renderPage("42");
+  it("renders an empty pattern area when no state is provided", async () => {
+    await renderPage("42");
 
     expect(document.querySelector(".pt-pattern")).toBeInTheDocument();
     expect(document.querySelectorAll(".pt-line").length).toBe(0);
   });
 
-  it("opens the detail panel with a spinner when a translated abbreviation is clicked", () => {
+  it("opens the detail panel with a spinner when a translated abbreviation is clicked", async () => {
     abbreviationService.getAbbreviationByCode.mockReturnValue(
       new Promise(() => {}),
     );
 
-    renderPage("42", { tokens: LINES });
+    await renderPage("42", { tokens: LINES });
     fireEvent.click(screen.getByText("stitches"));
 
     expect(document.querySelector(".pt-detail-col--open")).toBeInTheDocument();
@@ -145,7 +166,7 @@ describe("PatternTranslationPage", () => {
       video_link: null,
     });
 
-    renderPage("42", { tokens: LINES });
+    await renderPage("42", { tokens: LINES });
     fireEvent.click(screen.getByText("stitches"));
 
     await waitFor(() => {
@@ -158,7 +179,7 @@ describe("PatternTranslationPage", () => {
       new Error("Abbreviation not found"),
     );
 
-    renderPage("42", { tokens: LINES });
+    await renderPage("42", { tokens: LINES });
     fireEvent.click(screen.getByText("stitches"));
 
     expect(
@@ -177,7 +198,7 @@ describe("PatternTranslationPage", () => {
       video_link: null,
     });
 
-    renderPage("42", { tokens: LINES });
+    await renderPage("42", { tokens: LINES });
     fireEvent.click(screen.getByText("stitches"));
     await screen.findByText("A basic knitting stitch");
 
@@ -202,7 +223,7 @@ describe("PatternTranslationPage", () => {
       video_link: null,
     });
 
-    renderPage("42", { tokens: LINES });
+    await renderPage("42", { tokens: LINES });
     fireEvent.click(screen.getByText("stitches"));
     await screen.findByText("A basic knitting stitch");
 
@@ -239,7 +260,7 @@ describe("PatternTranslationPage", () => {
       },
     ];
 
-    renderPage("42", { tokens: lines });
+    await renderPage("42", { tokens: lines });
     fireEvent.click(screen.getByText("knit"));
 
     await waitFor(() => {
@@ -260,7 +281,7 @@ describe("PatternTranslationPage", () => {
       video_link: null,
     });
 
-    renderPage("42", { tokens: LINES });
+    await renderPage("42", { tokens: LINES });
     fireEvent.click(screen.getByText("stitches"));
 
     await waitFor(() => {
@@ -281,7 +302,7 @@ describe("PatternTranslationPage", () => {
       video_link: null,
     });
 
-    renderPage("42", { tokens: LINES });
+    await renderPage("42", { tokens: LINES });
     fireEvent.click(screen.getByText("stitches"));
     await screen.findByText("A basic knitting stitch");
 
@@ -299,7 +320,7 @@ describe("PatternTranslationPage", () => {
       }),
     );
 
-    renderPage("42", { tokens: LINES });
+    await renderPage("42", { tokens: LINES });
     fireEvent.click(screen.getByText("stitches"));
 
     fireEvent.mouseDown(screen.getByText("Cast on"));
@@ -324,6 +345,74 @@ describe("PatternTranslationPage", () => {
     ).not.toBeInTheDocument();
   });
 
+  it("shows the Adapt pattern button when pattern status is TOKENIZED", async () => {
+    await renderPage("42", { tokens: [] });
+
+    expect(
+      screen.getByRole("button", { name: /Adapt pattern/i }),
+    ).toBeInTheDocument();
+  });
+
+  it("disables the Adapt pattern button when pattern status is not TOKENIZED", async () => {
+    patternService.getPattern.mockResolvedValue({
+      id: "42",
+      title: "Test Pattern",
+      status: "CONFIRMED",
+      sizes: [],
+    });
+
+    await renderPage("42", { tokens: [] });
+
+    expect(
+      screen.getByRole("button", { name: /Adapt pattern/i }),
+    ).toBeDisabled();
+  });
+
+  it("opens the adapt modal when Adapt pattern is clicked", async () => {
+    await renderPage("42", { tokens: [] });
+
+    fireEvent.click(screen.getByRole("button", { name: /Adapt pattern/i }));
+
+    expect(screen.getByTestId("adapt-modal")).toBeInTheDocument();
+  });
+
+  it("closes the adapt modal when onClose is triggered", async () => {
+    await renderPage("42", { tokens: [] });
+
+    fireEvent.click(screen.getByRole("button", { name: /Adapt pattern/i }));
+    fireEvent.click(screen.getByRole("button", { name: "Close modal" }));
+
+    expect(screen.queryByTestId("adapt-modal")).not.toBeInTheDocument();
+  });
+
+  it("closes the modal and navigates to scaled page when onConfirm is triggered", async () => {
+    const router = createMemoryRouter(
+      [
+        {
+          path: "/patterns/:id/translation",
+          element: <PatternTranslationPage />,
+        },
+        { path: "/patterns/:id/scaled", element: <div>Scaled page</div> },
+      ],
+      {
+        initialEntries: [
+          { pathname: "/patterns/42/translation", state: { tokens: [] } },
+        ],
+      },
+    );
+    await act(async () => {
+      render(<RouterProvider router={router} />);
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: /Adapt pattern/i }));
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: "Confirm modal" }));
+    });
+
+    expect(await screen.findByText("Scaled page")).toBeInTheDocument();
+  });
+
   it("discards a failed fetch result when the request was cancelled", async () => {
     let rejectAbbr;
     abbreviationService.getAbbreviationByCode.mockReturnValue(
@@ -332,7 +421,7 @@ describe("PatternTranslationPage", () => {
       }),
     );
 
-    renderPage("42", { tokens: LINES });
+    await renderPage("42", { tokens: LINES });
     fireEvent.click(screen.getByText("stitches"));
 
     fireEvent.mouseDown(screen.getByText("Cast on"));

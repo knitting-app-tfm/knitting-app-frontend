@@ -22,7 +22,7 @@ const INITIAL_DATA_RICH_YARN = {
       yarn_weight: "DK",
       meters_per_unit: 200,
       grams_per_unit: 100,
-      grams_needed: 300,
+      grams_needed: [300, 400],
       strands: 3,
     },
   ],
@@ -74,21 +74,21 @@ describe("ConfirmPatternForm", () => {
     );
 
     // Initial sizes from initialData are rendered
-    expect(screen.getByText("XS")).toBeInTheDocument();
-    expect(screen.getByText("S")).toBeInTheDocument();
+    expect(screen.getByLabelText("Remove size XS")).toBeInTheDocument();
+    expect(screen.getByLabelText("Remove size S")).toBeInTheDocument();
 
     // Add a new size
     fireEvent.change(screen.getByLabelText("New size"), {
       target: { value: "M" },
     });
     fireEvent.click(screen.getByRole("button", { name: "Add size" }));
-    expect(screen.getByText("M")).toBeInTheDocument();
+    expect(screen.getByLabelText("Remove size M")).toBeInTheDocument();
 
     // Remove the XS size
     fireEvent.click(screen.getByLabelText("Remove size XS"));
-    expect(screen.queryByText("XS")).not.toBeInTheDocument();
-    expect(screen.getByText("S")).toBeInTheDocument();
-    expect(screen.getByText("M")).toBeInTheDocument();
+    expect(screen.queryByLabelText("Remove size XS")).not.toBeInTheDocument();
+    expect(screen.getByLabelText("Remove size S")).toBeInTheDocument();
+    expect(screen.getByLabelText("Remove size M")).toBeInTheDocument();
   });
 
   it("can add and remove yarns", () => {
@@ -227,7 +227,7 @@ describe("ConfirmPatternForm", () => {
     fireEvent.change(sizeInput, { target: { value: "XXL" } });
     fireEvent.keyDown(sizeInput, { key: "Enter" });
 
-    expect(screen.getByText("XXL")).toBeInTheDocument();
+    expect(screen.getByLabelText("Remove size XXL")).toBeInTheDocument();
   });
 
   it("does not add an empty size when Add size is clicked with no input", () => {
@@ -240,6 +240,7 @@ describe("ConfirmPatternForm", () => {
       />,
     );
 
+    fireEvent.click(screen.getByLabelText("This pattern is one size"));
     fireEvent.click(screen.getByRole("button", { name: "Add size" }));
 
     expect(screen.getByText("No sizes added yet")).toBeInTheDocument();
@@ -255,7 +256,7 @@ describe("ConfirmPatternForm", () => {
       />,
     );
 
-    expect(screen.getByText("No sizes added yet")).toBeInTheDocument();
+    expect(screen.getByText("One size")).toBeInTheDocument();
     expect(screen.getByText("No yarns added yet")).toBeInTheDocument();
   });
 
@@ -348,6 +349,8 @@ describe("ConfirmPatternForm", () => {
       />,
     );
 
+    fireEvent.click(screen.getByLabelText("This pattern is one size"));
+
     const sizeInput = screen.getByLabelText("New size");
     fireEvent.change(sizeInput, { target: { value: "XL" } });
     fireEvent.keyDown(sizeInput, { key: "a" });
@@ -422,7 +425,7 @@ describe("ConfirmPatternForm", () => {
     const yarn = onSubmit.mock.calls[0][0].yarns[0];
     expect(yarn.meters_per_unit).toBe("250");
     expect(yarn.grams_per_unit).toBe("120");
-    expect(yarn.grams_needed).toBe("350");
+    expect(yarn.grams_needed).toEqual(["350", "400"]);
     expect(yarn.strands).toBe(2);
   });
 
@@ -437,7 +440,7 @@ describe("ConfirmPatternForm", () => {
       />,
     );
 
-    expect(screen.getByText("No sizes added yet")).toBeInTheDocument();
+    expect(screen.getByText("One size")).toBeInTheDocument();
     expect(screen.getByText("No yarns added yet")).toBeInTheDocument();
 
     fireEvent.click(getConfirmButton());
@@ -526,6 +529,118 @@ describe("ConfirmPatternForm", () => {
     expect(
       screen.getByText("Only JPG, PNG and WebP images are allowed."),
     ).toBeInTheDocument();
+  });
+
+  it("triggers the file input when the cover image area is clicked", () => {
+    render(
+      <ConfirmPatternForm
+        initialData={INITIAL_DATA}
+        onSubmit={vi.fn()}
+        loading={false}
+        error={null}
+      />,
+    );
+
+    const input = document.getElementById("coverImage");
+    const clickSpy = vi.spyOn(input, "click").mockImplementation(() => {});
+
+    const preview = screen.getByRole("button", { name: "Upload cover image" });
+    fireEvent.click(preview);
+
+    expect(clickSpy).toHaveBeenCalled();
+  });
+
+  it("triggers the file input when Enter is pressed on the cover image area", () => {
+    render(
+      <ConfirmPatternForm
+        initialData={INITIAL_DATA}
+        onSubmit={vi.fn()}
+        loading={false}
+        error={null}
+      />,
+    );
+
+    const input = document.getElementById("coverImage");
+    const clickSpy = vi.spyOn(input, "click").mockImplementation(() => {});
+
+    const preview = screen.getByRole("button", { name: "Upload cover image" });
+    fireEvent.keyDown(preview, { key: "Enter" });
+
+    expect(clickSpy).toHaveBeenCalled();
+  });
+
+  it("clears sizes when the one-size checkbox is checked on a multi-size pattern", () => {
+    const onSubmit = vi.fn();
+    render(
+      <ConfirmPatternForm
+        initialData={INITIAL_DATA}
+        onSubmit={onSubmit}
+        loading={false}
+        error={null}
+      />,
+    );
+
+    expect(screen.getByLabelText("Remove size XS")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByLabelText("This pattern is one size"));
+
+    expect(screen.queryByLabelText("Remove size XS")).not.toBeInTheDocument();
+    expect(screen.getByText("One size")).toBeInTheDocument();
+
+    fireEvent.click(getConfirmButton());
+    expect(onSubmit.mock.calls[0][0].sizes).toEqual([]);
+  });
+
+  it("revokes the previous object URL when a subsequent file change clears the preview", () => {
+    const revokeObjectURL = vi.spyOn(URL, "revokeObjectURL");
+
+    render(
+      <ConfirmPatternForm
+        initialData={INITIAL_DATA}
+        onSubmit={vi.fn()}
+        loading={false}
+        error={null}
+      />,
+    );
+
+    const validFile = new File(["img"], "cover.jpg", { type: "image/jpeg" });
+    fireEvent.change(document.getElementById("coverImage"), {
+      target: { files: [validFile] },
+    });
+
+    fireEvent.change(document.getElementById("coverImage"), {
+      target: { files: [] },
+    });
+
+    expect(revokeObjectURL).toHaveBeenCalled();
+  });
+
+  it("normalizes a scalar grams_needed into a single-element array when sizes is empty", () => {
+    const onSubmit = vi.fn();
+    render(
+      <ConfirmPatternForm
+        initialData={{
+          title: "Scalar Test",
+          craft: "KNITTING",
+          sizes: [],
+          yarns: [
+            {
+              label: "Yarn A",
+              yarn_weight: "DK",
+              strands: 1,
+              grams_needed: 300,
+            },
+          ],
+        }}
+        onSubmit={onSubmit}
+        loading={false}
+        error={null}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Confirm" }));
+
+    expect(onSubmit.mock.calls[0][0].yarns[0].grams_needed).toEqual(["300"]);
   });
 
   it("changes craft via the visual radio toggle", () => {

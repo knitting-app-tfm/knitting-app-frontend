@@ -1,21 +1,37 @@
 import { useState, useRef, useEffect } from "react";
-import { useParams, Link, useLocation } from "react-router-dom";
+import { useParams, Link, useLocation, useNavigate } from "react-router-dom";
 import { getAbbreviationByCode } from "../../services/abbreviationService";
+import { getPattern, getScaling } from "../../services/patternService";
 import TokenRenderer from "../../components/translation/TokenRenderer";
 import AbbreviationDetail from "../../components/dictionary/AbbreviationDetail";
+import AdaptPatternModal from "../../components/pattern/AdaptPatternModal";
 import "./PatternDetailPage.css";
 import "./PatternTranslationPage.css";
 
 function PatternTranslationPage() {
   const { id } = useParams();
   const { state } = useLocation();
+  const navigate = useNavigate();
   const lines = state?.tokens ?? [];
+
+  const [pattern, setPattern] = useState(null);
+  const [scaling, setScaling] = useState(null);
+  const [modalOpen, setModalOpen] = useState(false);
 
   const [selectedAbbr, setSelectedAbbr] = useState(null);
   const [abbrLoading, setAbbrLoading] = useState(false);
   const [abbrError, setAbbrError] = useState(null);
   const detailRef = useRef(null);
   const fetchCancelledRef = useRef(false);
+
+  useEffect(() => {
+    getPattern(id)
+      .then(setPattern)
+      .catch(() => {});
+    getScaling(id)
+      .then(setScaling)
+      .catch(() => {});
+  }, [id]);
 
   const panelOpen = abbrLoading || selectedAbbr !== null || abbrError !== null;
 
@@ -50,6 +66,11 @@ function PatternTranslationPage() {
     }
   }
 
+  function handleModalConfirm() {
+    setModalOpen(false);
+    navigate(`/patterns/${id}/scaled`);
+  }
+
   function handleCloseDetail() {
     fetchCancelledRef.current = true;
     setSelectedAbbr(null);
@@ -68,12 +89,50 @@ function PatternTranslationPage() {
       </nav>
 
       <div className="pd-header">
-        <h1 className="pd-header__title">Pattern Translation</h1>
+        <div className="pt-header-row">
+          <h1 className="pd-header__title">Pattern Translation</h1>
+          <button
+            className="pt-adapt-btn"
+            onClick={() => setModalOpen(true)}
+            disabled={pattern?.status !== "TOKENIZED"}
+          >
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <polyline points="15 3 21 3 21 9" />
+              <polyline points="9 21 3 21 3 15" />
+              <line x1="21" y1="3" x2="14" y2="10" />
+              <line x1="3" y1="21" x2="10" y2="14" />
+            </svg>
+            Adapt pattern
+          </button>
+        </div>
       </div>
 
       <div className="pt-card">
         <div className="pt-card__head">
-          <span className="pt-card__label">Translated pattern</span>
+          <div className="pt-toggles">
+            <button className="pt-toggle-btn pt-toggle-btn--active" disabled>
+              Translated
+            </button>
+            {scaling ? (
+              <Link to={`/patterns/${id}/scaled`} className="pt-toggle-btn">
+                Scaled
+              </Link>
+            ) : (
+              <span className="pt-toggle-btn pt-toggle-btn--disabled">
+                Scaled
+              </span>
+            )}
+          </div>
         </div>
 
         <div className="pt-pattern">
@@ -101,6 +160,14 @@ function PatternTranslationPage() {
           )}
         </div>
       </div>
+
+      {modalOpen && pattern && (
+        <AdaptPatternModal
+          pattern={pattern}
+          onClose={() => setModalOpen(false)}
+          onConfirm={handleModalConfirm}
+        />
+      )}
 
       <div
         ref={detailRef}

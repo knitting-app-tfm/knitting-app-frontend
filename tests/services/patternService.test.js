@@ -10,6 +10,12 @@ import {
   confirmPattern,
   translatePattern,
   getPatterns,
+  getScaling,
+  putScaling,
+  getScaledPattern,
+  getUserYarns,
+  putUserYarn,
+  getYarnCalculation,
 } from "../../src/services/patternService";
 
 const API_URL = "http://localhost:8000";
@@ -223,6 +229,270 @@ describe("confirmPattern", () => {
 
     await expect(confirmPattern("42", new FormData())).rejects.toThrow(
       "Error al confirmar el patrón",
+    );
+  });
+});
+
+describe("getScaling", () => {
+  it("GETs /patterns/{id}/scaling and returns the scaling", async () => {
+    const scaling = { size_label: "S", size_position: 1 };
+    const fetchMock = mockFetch(scaling);
+    vi.stubGlobal("fetch", fetchMock);
+
+    const result = await getScaling("42");
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      `${API_URL}/patterns/42/scaling`,
+      expect.any(Object),
+    );
+    expect(result).toEqual(scaling);
+  });
+
+  it("returns null when the response status is 404", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        status: 404,
+        ok: false,
+        json: () => Promise.resolve({ detail: "Not found" }),
+      }),
+    );
+
+    const result = await getScaling("42");
+
+    expect(result).toBeNull();
+  });
+
+  it("throws with the detail string when the response is not ok (non-404)", async () => {
+    vi.stubGlobal("fetch", mockFetch({ detail: "Unauthorized" }, false));
+
+    await expect(getScaling("42")).rejects.toThrow("Unauthorized");
+  });
+
+  it("throws a generic message when detail is not a string", async () => {
+    vi.stubGlobal("fetch", mockFetch({ detail: [{ msg: "error" }] }, false));
+
+    await expect(getScaling("42")).rejects.toThrow("Failed to load scaling");
+  });
+});
+
+describe("putScaling", () => {
+  it("PUTs to /patterns/{id}/scaling with JSON body", async () => {
+    const payload = { size_label: "S", size_position: 1 };
+    const fetchMock = mockFetch(payload);
+    vi.stubGlobal("fetch", fetchMock);
+
+    await putScaling("42", payload);
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      `${API_URL}/patterns/42/scaling`,
+      expect.objectContaining({
+        method: "PUT",
+        body: JSON.stringify(payload),
+      }),
+    );
+  });
+
+  it("returns the parsed result on success", async () => {
+    const result = { size_label: "S", size_position: 1 };
+    vi.stubGlobal("fetch", mockFetch(result));
+
+    const data = await putScaling("42", "S", 1);
+
+    expect(data).toEqual(result);
+  });
+
+  it("throws with the detail string when the response is not ok", async () => {
+    vi.stubGlobal("fetch", mockFetch({ detail: "Invalid size" }, false));
+
+    await expect(putScaling("42", "X", 99)).rejects.toThrow("Invalid size");
+  });
+
+  it("throws a generic message when detail is not a string", async () => {
+    vi.stubGlobal("fetch", mockFetch({ detail: [{ msg: "error" }] }, false));
+
+    await expect(putScaling("42", "X", 99)).rejects.toThrow(
+      "Failed to save scaling",
+    );
+  });
+});
+
+describe("getScaledPattern", () => {
+  it("GETs /patterns/{id}/scaled and returns the scaled data", async () => {
+    const scaled = { size_label: "M", rows_warning: false, lines: [] };
+    const fetchMock = mockFetch(scaled);
+    vi.stubGlobal("fetch", fetchMock);
+
+    const result = await getScaledPattern("42");
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      `${API_URL}/patterns/42/scaled`,
+      expect.any(Object),
+    );
+    expect(result).toEqual(scaled);
+  });
+
+  it("throws with the detail message when the response is not ok", async () => {
+    vi.stubGlobal(
+      "fetch",
+      mockFetch({ detail: "Scaling not configured" }, false),
+    );
+
+    await expect(getScaledPattern("42")).rejects.toThrow(
+      "Scaling not configured",
+    );
+  });
+
+  it("throws a generic message when detail is not a string", async () => {
+    vi.stubGlobal("fetch", mockFetch({ detail: [{ msg: "error" }] }, false));
+
+    await expect(getScaledPattern("42")).rejects.toThrow(
+      "Failed to load scaled pattern",
+    );
+  });
+});
+
+describe("confirmPattern grams_needed", () => {
+  it("test_confirm_grams_needed_length_mismatch: propagates 400 when array length does not match sizes", async () => {
+    vi.stubGlobal(
+      "fetch",
+      mockFetch({ detail: "grams_needed length must match sizes" }, false),
+    );
+
+    const fd = new FormData();
+    fd.append("sizes", JSON.stringify(["S"]));
+    fd.append("yarns", JSON.stringify([{ grams_needed: [100, 200] }]));
+
+    await expect(confirmPattern("42", fd)).rejects.toThrow(
+      "grams_needed length must match sizes",
+    );
+  });
+
+  it("test_confirm_grams_needed_one_size: accepts a single-element grams_needed array", async () => {
+    const confirmed = { id: "42", status: "CONFIRMED" };
+    vi.stubGlobal("fetch", mockFetch(confirmed));
+
+    const fd = new FormData();
+    fd.append("sizes", JSON.stringify([]));
+    fd.append("yarns", JSON.stringify([{ grams_needed: [100] }]));
+
+    const result = await confirmPattern("42", fd);
+
+    expect(result).toEqual(confirmed);
+  });
+
+  it("test_confirm_grams_needed_null: accepts null grams_needed", async () => {
+    const confirmed = { id: "42", status: "CONFIRMED" };
+    vi.stubGlobal("fetch", mockFetch(confirmed));
+
+    const fd = new FormData();
+    fd.append("yarns", JSON.stringify([{ grams_needed: null }]));
+
+    const result = await confirmPattern("42", fd);
+
+    expect(result).toEqual(confirmed);
+  });
+});
+
+describe("getUserYarns", () => {
+  it("GETs /patterns/{id}/yarns and returns the list", async () => {
+    const yarns = [{ pattern_yarn_id: "1", meters_per_unit: 200 }];
+    const fetchMock = mockFetch(yarns);
+    vi.stubGlobal("fetch", fetchMock);
+
+    const result = await getUserYarns("42");
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      `${API_URL}/patterns/42/yarns`,
+      expect.any(Object),
+    );
+    expect(result).toEqual(yarns);
+  });
+
+  it("throws with the detail message when the response is not ok", async () => {
+    vi.stubGlobal("fetch", mockFetch({ detail: "Pattern not found" }, false));
+
+    await expect(getUserYarns("42")).rejects.toThrow("Pattern not found");
+  });
+
+  it("throws a generic message when detail is not a string", async () => {
+    vi.stubGlobal("fetch", mockFetch({ detail: [{ msg: "error" }] }, false));
+
+    await expect(getUserYarns("42")).rejects.toThrow(
+      "Failed to load user yarns",
+    );
+  });
+});
+
+describe("putUserYarn", () => {
+  it("PUTs to /patterns/{id}/yarns/{yarn_id} with JSON body", async () => {
+    const payload = { meters_per_unit: 200, grams_per_unit: 100, strands: 1 };
+    const fetchMock = mockFetch({ ...payload, id: "1" });
+    vi.stubGlobal("fetch", fetchMock);
+
+    await putUserYarn("42", "1", payload);
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      `${API_URL}/patterns/42/yarns/1`,
+      expect.objectContaining({
+        method: "PUT",
+        body: JSON.stringify(payload),
+      }),
+    );
+  });
+
+  it("returns the parsed result on success", async () => {
+    const result = { id: "1", meters_per_unit: 200 };
+    vi.stubGlobal("fetch", mockFetch(result));
+
+    const data = await putUserYarn("42", "1", { meters_per_unit: 200 });
+
+    expect(data).toEqual(result);
+  });
+
+  it("throws with the detail message when the response is not ok", async () => {
+    vi.stubGlobal("fetch", mockFetch({ detail: "Invalid data" }, false));
+
+    await expect(putUserYarn("42", "1", {})).rejects.toThrow("Invalid data");
+  });
+
+  it("throws a generic message when detail is not a string", async () => {
+    vi.stubGlobal("fetch", mockFetch({ detail: [{ msg: "error" }] }, false));
+
+    await expect(putUserYarn("42", "1", {})).rejects.toThrow(
+      "Failed to save user yarn",
+    );
+  });
+});
+
+describe("getYarnCalculation", () => {
+  it("GETs /patterns/{id}/yarn-calculation and returns the result", async () => {
+    const result = {
+      yarns: [{ calculated: true, result: { grams_needed: 150 } }],
+    };
+    const fetchMock = mockFetch(result);
+    vi.stubGlobal("fetch", fetchMock);
+
+    const data = await getYarnCalculation("42");
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      `${API_URL}/patterns/42/yarn-calculation`,
+      expect.any(Object),
+    );
+    expect(data).toEqual(result);
+  });
+
+  it("throws with the detail message when the response is not ok", async () => {
+    vi.stubGlobal("fetch", mockFetch({ detail: "Pattern not found" }, false));
+
+    await expect(getYarnCalculation("42")).rejects.toThrow("Pattern not found");
+  });
+
+  it("throws a generic message when detail is not a string", async () => {
+    vi.stubGlobal("fetch", mockFetch({ detail: [{ msg: "error" }] }, false));
+
+    await expect(getYarnCalculation("42")).rejects.toThrow(
+      "Failed to calculate yarn needed",
     );
   });
 });
