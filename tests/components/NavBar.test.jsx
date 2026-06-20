@@ -69,6 +69,31 @@ describe("NavBar", () => {
     ).not.toBeInTheDocument();
   });
 
+  it("renders Profile link when the user is authenticated and the menu is opened", () => {
+    useAuth.mockReturnValue({
+      user: { email: "user@example.com", displayName: "Alice" },
+      logout: vi.fn(),
+    });
+    renderNavBar();
+    fireEvent.click(screen.getByRole("button", { name: /alice/i }));
+    expect(
+      screen.getByRole("menuitem", { name: /profile/i }),
+    ).toBeInTheDocument();
+  });
+
+  it("closes the dropdown when the Profile link is clicked", () => {
+    useAuth.mockReturnValue({
+      user: { email: "user@example.com", displayName: "Alice" },
+      logout: vi.fn(),
+    });
+    renderNavBar();
+    fireEvent.click(screen.getByRole("button", { name: /alice/i }));
+    fireEvent.click(screen.getByRole("menuitem", { name: /profile/i }));
+    expect(
+      screen.queryByRole("menuitem", { name: /profile/i }),
+    ).not.toBeInTheDocument();
+  });
+
   it("renders logout option when the user is authenticated and the menu is opened", () => {
     useAuth.mockReturnValue({
       user: { email: "user@example.com", displayName: "Alice" },
