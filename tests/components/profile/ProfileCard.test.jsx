@@ -28,9 +28,7 @@ describe("ProfileCard", () => {
     });
     renderCard();
 
-    await waitFor(() =>
-      expect(screen.getByText("alice")).toBeInTheDocument(),
-    );
+    await waitFor(() => expect(screen.getByText("alice")).toBeInTheDocument());
     expect(screen.getByText("alice@example.com")).toBeInTheDocument();
     expect(screen.getByText("Username")).toBeInTheDocument();
     expect(screen.getByText("Email")).toBeInTheDocument();
