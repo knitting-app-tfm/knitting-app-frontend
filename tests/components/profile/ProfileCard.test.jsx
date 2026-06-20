@@ -34,6 +34,20 @@ describe("ProfileCard", () => {
     expect(screen.getByText("Email")).toBeInTheDocument();
   });
 
+  it("shows Logged in with Ravelry and hides the email field for Ravelry users", async () => {
+    apiClient.apiFetch.mockResolvedValue({
+      ok: true,
+      json: async () => ({ username: "ainapolo", email: null }),
+    });
+    renderCard();
+
+    await waitFor(() =>
+      expect(screen.getByText("ainapolo")).toBeInTheDocument(),
+    );
+    expect(screen.getByText("Logged in with Ravelry")).toBeInTheDocument();
+    expect(screen.queryByText("Email")).not.toBeInTheDocument();
+  });
+
   it("hides the spinner after loading completes", async () => {
     apiClient.apiFetch.mockResolvedValue({
       ok: true,

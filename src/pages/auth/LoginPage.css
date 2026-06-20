@@ -43,3 +43,23 @@
 .login-card__link:hover {
   color: var(--kn-secondary-dark);
 }
+
+.login-card__divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin: var(--kn-spacing-5) 0 var(--kn-spacing-4);
+  color: var(--kn-text-muted);
+  font-size: var(--kn-text-sm);
+}
+
+.login-card__divider::before,
+.login-card__divider::after {
+  content: "";
+  flex: 1;
+  border-top: 1px solid var(--kn-border);
+}
+
+.login-card__divider span {
+  padding: 0 var(--kn-spacing-3);
+}

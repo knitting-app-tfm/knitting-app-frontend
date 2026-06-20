@@ -129,6 +129,56 @@ describe("NavBar", () => {
     expect(screen.getByRole("button", { name: /alice/i })).toBeInTheDocument();
   });
 
+  it("shows the Ravelry username when the user logged in with Ravelry", () => {
+    useAuth.mockReturnValue({
+      user: { uid: "ravelry_ainapolo", email: null, displayName: null },
+      logout: vi.fn(),
+    });
+    renderNavBar();
+    expect(
+      screen.getByRole("button", { name: /ainapolo/i }),
+    ).toBeInTheDocument();
+  });
+
+  it('falls back to "User" when displayName, email and uid prefix are all absent', () => {
+    useAuth.mockReturnValue({
+      user: { uid: "some_other_uid", email: null, displayName: null },
+      logout: vi.fn(),
+    });
+    renderNavBar();
+    expect(screen.getByRole("button", { name: /user/i })).toBeInTheDocument();
+  });
+
+  it("renders nothing in the user section while auth is initialising (user === undefined)", () => {
+    useAuth.mockReturnValue({ user: undefined, logout: vi.fn() });
+    renderNavBar();
+    expect(
+      screen.queryByRole("link", { name: "Log in" }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("link", { name: "Register" }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("keeps the dropdown open when a mousedown occurs inside the user menu", () => {
+    useAuth.mockReturnValue({
+      user: { email: "user@example.com", displayName: "Alice" },
+      logout: vi.fn(),
+    });
+    renderNavBar();
+
+    const btn = screen.getByRole("button", { name: /alice/i });
+    fireEvent.click(btn);
+    expect(
+      screen.getByRole("menuitem", { name: /log out/i }),
+    ).toBeInTheDocument();
+
+    fireEvent.mouseDown(btn);
+    expect(
+      screen.getByRole("menuitem", { name: /log out/i }),
+    ).toBeInTheDocument();
+  });
+
   it("closes the dropdown when a mousedown occurs outside the user menu", () => {
     useAuth.mockReturnValue({
       user: { email: "user@example.com", displayName: "Alice" },

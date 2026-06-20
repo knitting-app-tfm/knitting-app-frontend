@@ -46,10 +46,14 @@ function ProfileCard() {
             <span className="profile-field__label">Username</span>
             <span className="profile-field__value">{profile.username}</span>
           </div>
-          <div className="profile-field">
-            <span className="profile-field__label">Email</span>
-            <span className="profile-field__value">{profile.email}</span>
-          </div>
+          {profile.email ? (
+            <div className="profile-field">
+              <span className="profile-field__label">Email</span>
+              <span className="profile-field__value">{profile.email}</span>
+            </div>
+          ) : (
+            <p className="profile-card__ravelry-note">Logged in with Ravelry</p>
+          )}
         </div>
       )}
     </div>
