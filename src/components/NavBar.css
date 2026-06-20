@@ -145,6 +145,10 @@
   color: #a02020;
 }
 
+a.nav-user__dropdown-item {
+  text-decoration: none;
+}
+
 /* Mobile toggle */
 .navbar-kn .navbar-toggler {
   border-color: rgba(255, 255, 255, 0.3);
