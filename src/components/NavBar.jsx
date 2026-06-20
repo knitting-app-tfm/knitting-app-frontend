@@ -7,7 +7,11 @@ function UserMenu({ user, logout }) {
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
   const navigate = useNavigate();
-  const displayName = user.displayName || user.email?.split("@")[0] || "User";
+  const displayName =
+    user.displayName ||
+    user.email?.split("@")[0] ||
+    (user.uid?.startsWith("ravelry_") ? user.uid.slice(8) : null) ||
+    "User";
 
   useEffect(() => {
     const handler = (e) => {

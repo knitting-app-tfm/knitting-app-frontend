@@ -42,3 +42,9 @@
   border-radius: var(--kn-radius-md);
   padding: var(--kn-spacing-2) var(--kn-spacing-3);
 }
+
+.profile-card__ravelry-note {
+  font-size: var(--kn-text-sm);
+  color: var(--kn-text-muted);
+  margin: 0;
+}

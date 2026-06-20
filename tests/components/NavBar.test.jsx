@@ -129,9 +129,20 @@ describe("NavBar", () => {
     expect(screen.getByRole("button", { name: /alice/i })).toBeInTheDocument();
   });
 
-  it('falls back to "User" when both displayName and email are null', () => {
+  it("shows the Ravelry username when the user logged in with Ravelry", () => {
     useAuth.mockReturnValue({
-      user: { email: null, displayName: null },
+      user: { uid: "ravelry_ainapolo", email: null, displayName: null },
+      logout: vi.fn(),
+    });
+    renderNavBar();
+    expect(
+      screen.getByRole("button", { name: /ainapolo/i }),
+    ).toBeInTheDocument();
+  });
+
+  it('falls back to "User" when displayName, email and uid prefix are all absent', () => {
+    useAuth.mockReturnValue({
+      user: { uid: "some_other_uid", email: null, displayName: null },
       logout: vi.fn(),
     });
     renderNavBar();
