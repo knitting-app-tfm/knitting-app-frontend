@@ -7,7 +7,7 @@ function UserMenu({ user, logout }) {
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
   const navigate = useNavigate();
-  const displayName = user.displayName || user.email.split("@")[0];
+  const displayName = user.displayName || user.email?.split("@")[0] || "User";
 
   useEffect(() => {
     const handler = (e) => {

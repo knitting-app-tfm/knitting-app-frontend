@@ -13,6 +13,7 @@ import PatternDetailPage from "../pages/pattern/PatternDetailPage";
 import PatternTranslationPage from "../pages/pattern/PatternTranslationPage";
 import PatternScaledPage from "../pages/pattern/PatternScaledPage";
 import ProfilePage from "../pages/profile/ProfilePage";
+import RavelryCompletePage from "../pages/auth/RavelryCompletePage";
 
 const router = createBrowserRouter([
   {
@@ -21,6 +22,7 @@ const router = createBrowserRouter([
       { path: "/", element: <App /> },
       { path: "/register", element: <RegisterPage /> },
       { path: "/login", element: <LoginPage /> },
+      { path: "/ravelry/complete", element: <RavelryCompletePage /> },
       { path: "/patterns", element: <PatternListPage /> },
       { path: "/import", element: <ImportPage /> },
       { path: "/import/pdf", element: <ImportPdfPage /> },
