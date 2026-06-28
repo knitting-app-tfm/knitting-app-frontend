@@ -16,13 +16,26 @@ export default defineConfig({
     port: 5173,
     proxy: {
       "/patterns": {
-        target: "http://localhost:8000",
+        target: "https://localhost:8000",
         changeOrigin: true,
+        secure: false,
         bypass: spaBypass,
       },
-      "/abbreviations": { target: "http://localhost:8000", changeOrigin: true },
-      "/auth": { target: "http://localhost:8000", changeOrigin: true },
-      "/media": { target: "http://localhost:8000", changeOrigin: true },
+      "/abbreviations": {
+        target: "https://localhost:8000",
+        changeOrigin: true,
+        secure: false,
+      },
+      "/auth": {
+        target: "https://localhost:8000",
+        changeOrigin: true,
+        secure: false,
+      },
+      "/media": {
+        target: "https://localhost:8000",
+        changeOrigin: true,
+        secure: false,
+      },
     },
   },
   test: {

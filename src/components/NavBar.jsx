@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink, Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext.jsx";
 import "./NavBar.css";
 
@@ -7,7 +7,11 @@ function UserMenu({ user, logout }) {
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
   const navigate = useNavigate();
-  const displayName = user.displayName || user.email.split("@")[0];
+  const displayName =
+    user.displayName ||
+    user.email?.split("@")[0] ||
+    (user.uid?.startsWith("ravelry_") ? user.uid.slice(8) : null) ||
+    "User";
 
   useEffect(() => {
     const handler = (e) => {
@@ -50,6 +54,28 @@ function UserMenu({ user, logout }) {
             <span className="nav-user__dropdown-email">{user.email}</span>
           </div>
           <div className="nav-user__divider" />
+          <Link
+            className="nav-user__dropdown-item"
+            role="menuitem"
+            to="/profile"
+            onClick={() => setOpen(false)}
+          >
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <circle cx="12" cy="8" r="4" />
+              <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" />
+            </svg>
+            Profile
+          </Link>
           <button
             className="nav-user__dropdown-item"
             role="menuitem"
